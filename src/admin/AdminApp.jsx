@@ -260,7 +260,10 @@ function StatusMessage({ type, message }) {
 function Field({ label, hint, required, children, wide = false }) {
   return (
     <label className={`admin-field ${wide ? 'field-wide' : ''}`}>
-      <span className="field-label">{label}{required && <b aria-hidden="true">*</b>}</span>
+      <span className="field-label">
+        <span>{label}</span>
+        {required && <em>Required</em>}
+      </span>
       {children}
       {hint && <small>{hint}</small>}
     </label>
@@ -546,19 +549,19 @@ function SettingsView({ settings, onSaved, notify }) {
         action={<button className="primary-button" type="submit" disabled={saving}>{saving ? <LoaderCircle className="spin" size={17} /> : <Save size={17} />}{saving ? 'Saving…' : 'Save changes'}</button>}
       />
 
-      <FormSection title="Brand identity" description="The names and announcement customers see first.">
+      <FormSection index="01" title="Brand identity" description="The names and announcement customers see first.">
         <Field label="Brand name" required><input value={form.brandName} onChange={(e) => change('brandName', e.target.value)} required /></Field>
         <Field label="Short name" hint="Used where space is limited."><input value={form.shortName} onChange={(e) => change('shortName', e.target.value)} /></Field>
         <Field label="Announcement" wide><input value={form.announcement} onChange={(e) => change('announcement', e.target.value)} placeholder="Free delivery in Casablanca…" /></Field>
       </FormSection>
 
-      <FormSection title="Homepage hero" description="Keep the headline concise and pair it with a strong automotive image.">
+      <FormSection index="02" title="Homepage hero" description="Keep the headline concise and pair it with a strong automotive image.">
         <Field label="Hero title" required wide><input value={form.heroTitle} onChange={(e) => change('heroTitle', e.target.value)} required /></Field>
         <Field label="Hero subtitle" wide><textarea rows="3" value={form.heroSubtitle} onChange={(e) => change('heroSubtitle', e.target.value)} /></Field>
         <UploadField label="Hero image" value={form.heroImage} onChange={(value) => change('heroImage', value)} onStatus={notify} wide />
       </FormSection>
 
-      <FormSection title="Contact & location" description="Give customers a direct route to the store and your team.">
+      <FormSection index="03" title="Contact & location" description="Give customers a direct route to the store and your team.">
         <Field label="Phone"><input value={form.phone} onChange={(e) => change('phone', e.target.value)} placeholder="+212 …" /></Field>
         <Field label="WhatsApp"><input value={form.whatsapp} onChange={(e) => change('whatsapp', e.target.value)} placeholder="+212 …" /></Field>
         <Field label="Address" wide><input value={form.address} onChange={(e) => change('address', e.target.value)} /></Field>
@@ -566,13 +569,13 @@ function SettingsView({ settings, onSaved, notify }) {
         <Field label="Google Maps URL"><input type="url" value={form.mapUrl} onChange={(e) => change('mapUrl', e.target.value)} /></Field>
       </FormSection>
 
-      <FormSection title="Social presence" description="Connect the catalogue to the social profile customers already know.">
+      <FormSection index="04" title="Social presence" description="Connect the catalogue to the social profile customers already know.">
         <Field label="Instagram URL" wide>
           <div className="input-with-icon"><Instagram size={17} /><input type="url" value={form.instagram} onChange={(e) => change('instagram', e.target.value)} /></div>
         </Field>
       </FormSection>
 
-      <FormSection title="About the store" description="A short, credible introduction to the business.">
+      <FormSection index="05" title="About the store" description="A short, credible introduction to the business.">
         <Field label="Section title" wide><input value={form.aboutTitle} onChange={(e) => change('aboutTitle', e.target.value)} /></Field>
         <Field label="Story" wide><textarea rows="6" value={form.aboutText} onChange={(e) => change('aboutText', e.target.value)} /></Field>
         <UploadField label="About image" value={form.aboutImage} onChange={(value) => change('aboutImage', value)} onStatus={notify} wide />
@@ -585,14 +588,30 @@ function SettingsView({ settings, onSaved, notify }) {
   )
 }
 
-function FormSection({ title, description, children }) {
+function FormSection({ index, title, description, children }) {
   return (
     <section className="form-section">
       <div className="form-section-heading">
+        <span className="section-index">{index}</span>
         <h2>{title}</h2>
         <p>{description}</p>
       </div>
       <div className="form-grid">{children}</div>
+    </section>
+  )
+}
+
+function DrawerSection({ index, title, description, children, single = false }) {
+  return (
+    <section className="drawer-section">
+      <header className="drawer-section__heading">
+        <span>{index}</span>
+        <div>
+          <h3>{title}</h3>
+          {description && <p>{description}</p>}
+        </div>
+      </header>
+      <div className={`drawer-section__grid ${single ? 'single' : ''}`}>{children}</div>
     </section>
   )
 }
@@ -696,12 +715,17 @@ function CategoryEditor({ category, onClose, onSave, notify }) {
   return (
     <EditorDrawer title={category.id ? 'Edit category' : 'New category'} onClose={onClose} busy={saving}>
       <form className="drawer-form" onSubmit={submit} noValidate aria-busy={saving}>
-        <div className="drawer-form-body">
-          <Field label="Category name" required><input autoFocus value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
-          <Field label="Description"><textarea rows="5" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
-          <UploadField label="Category image" value={form.image} onChange={(value) => setForm({ ...form, image: value })} onStatus={notify} />
+        <div className="drawer-form-body category-editor-body">
+          <DrawerSection index="01" title="Category details" description="Name the collection and explain what customers will find." single>
+            <Field label="Category name" required><input autoFocus value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
+            <Field label="Description"><textarea rows="5" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
+          </DrawerSection>
+          <DrawerSection index="02" title="Cover image" description="Choose one strong image that represents this collection." single>
+            <UploadField label="Category image" value={form.image} onChange={(value) => setForm({ ...form, image: value })} onStatus={notify} />
+          </DrawerSection>
         </div>
         <div className="drawer-actions">
+          <div className="drawer-actions__copy"><span>Category draft</span><small>Save to publish these changes.</small></div>
           <button className="secondary-button" type="button" onClick={onClose} disabled={saving}>Cancel</button>
           <button className="primary-button" type="submit" disabled={saving}><Save size={16} />{saving ? 'Saving…' : 'Save category'}</button>
         </div>
@@ -901,51 +925,66 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
   return (
     <EditorDrawer title={product.id ? 'Edit product' : 'Add product'} wide onClose={onClose} busy={saving || galleryUploading}>
       <form className="drawer-form product-form" onSubmit={submit} noValidate aria-busy={saving}>
-        <div className="drawer-form-body form-grid">
-          <Field label="Product name" required wide><input autoFocus value={form.name} onChange={(e) => handleNameChange(e.target.value)} required /></Field>
-          <Field label="URL slug" required><input value={form.slug} onChange={(e) => change('slug', slugify(e.target.value))} required /></Field>
-          <Field label="Brand"><input value={form.brand} onChange={(e) => change('brand', e.target.value)} /></Field>
-          <Field label="Category" required>
-            <select value={form.category} onChange={(e) => change('category', e.target.value)} required>
-              <option value="">Select category</option>
-              {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-            </select>
-          </Field>
-          <Field label="Badge"><input value={form.badge} onChange={(e) => change('badge', e.target.value)} placeholder="New, Bestseller…" /></Field>
-          <Field label="Price (MAD)" required><input type="number" min="0" step="0.01" value={form.price} onChange={(e) => change('price', e.target.value)} required /></Field>
-          <Field label="Price label" hint="Optional text such as “Sur devis”."><input value={form.priceLabel} onChange={(e) => change('priceLabel', e.target.value)} /></Field>
-          <Field label="Compare-at price (MAD)"><input type="number" min="0" step="0.01" value={form.compareAtPrice} onChange={(e) => change('compareAtPrice', e.target.value)} /></Field>
-          <Field label="Compatible vehicles" hint="Separate models with commas."><input value={form.vehicleModels} onChange={(e) => change('vehicleModels', e.target.value)} placeholder="Dacia Duster, Renault Clio…" /></Field>
-          <Field label="Compatible years"><input value={form.years} onChange={(e) => change('years', e.target.value)} placeholder="2018–2025" /></Field>
-          <Field label="Description" wide><textarea rows="5" value={form.description} onChange={(e) => change('description', e.target.value)} /></Field>
-          <Field label="Features" hint="One per line for clean storefront bullets." wide><textarea rows="5" value={form.features} onChange={(e) => change('features', e.target.value)} /></Field>
-          <UploadField label="Main image" value={form.image} onChange={(value) => change('image', value)} onStatus={notify} wide />
-          <div className="admin-field field-wide">
-            <span className="field-label">Gallery</span>
-            <div className="gallery-grid">
-              {form.gallery.map((url) => (
-                <div className="gallery-item" key={url}>
-                  <img src={url} alt="" />
-                  <button type="button" onClick={() => change('gallery', form.gallery.filter((item) => item !== url))} aria-label="Remove image"><X size={14} /></button>
-                </div>
-              ))}
-              <label className="gallery-upload">
-                {galleryUploading ? <LoaderCircle className="spin" size={19} /> : <ImagePlus size={20} />}
-                <span>{galleryUploading ? 'Uploading…' : 'Upload'}</span>
-                <input type="file" accept="image/*" onChange={uploadGallery} disabled={galleryUploading} />
-              </label>
+        <div className="drawer-form-body product-editor-body">
+          <DrawerSection index="01" title="Product identity" description="The information customers use to recognize and browse this item.">
+            <Field label="Product name" required wide><input autoFocus value={form.name} onChange={(e) => handleNameChange(e.target.value)} required /></Field>
+            <Field label="URL slug" required><input value={form.slug} onChange={(e) => change('slug', slugify(e.target.value))} required /></Field>
+            <Field label="Brand"><input value={form.brand} onChange={(e) => change('brand', e.target.value)} /></Field>
+            <Field label="Category" required>
+              <select value={form.category} onChange={(e) => change('category', e.target.value)} required>
+                <option value="">Select category</option>
+                {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+              </select>
+            </Field>
+            <Field label="Badge"><input value={form.badge} onChange={(e) => change('badge', e.target.value)} placeholder="New, Bestseller…" /></Field>
+          </DrawerSection>
+
+          <DrawerSection index="02" title="Pricing & fitment" description="Set the commercial details and compatible vehicles.">
+            <Field label="Price (MAD)" required><input type="number" min="0" step="0.01" value={form.price} onChange={(e) => change('price', e.target.value)} required /></Field>
+            <Field label="Compare-at price (MAD)"><input type="number" min="0" step="0.01" value={form.compareAtPrice} onChange={(e) => change('compareAtPrice', e.target.value)} /></Field>
+            <Field label="Price label" hint="Optional text such as “Sur devis”."><input value={form.priceLabel} onChange={(e) => change('priceLabel', e.target.value)} /></Field>
+            <Field label="Compatible years"><input value={form.years} onChange={(e) => change('years', e.target.value)} placeholder="2018–2025" /></Field>
+            <Field label="Compatible vehicles" hint="Separate models with commas." wide><input value={form.vehicleModels} onChange={(e) => change('vehicleModels', e.target.value)} placeholder="Dacia Duster, Renault Clio…" /></Field>
+          </DrawerSection>
+
+          <DrawerSection index="03" title="Sales content" description="Explain the benefit clearly, then list the essential features.">
+            <Field label="Description" wide><textarea rows="5" value={form.description} onChange={(e) => change('description', e.target.value)} /></Field>
+            <Field label="Features" hint="One per line for clean storefront bullets." wide><textarea rows="5" value={form.features} onChange={(e) => change('features', e.target.value)} /></Field>
+          </DrawerSection>
+
+          <DrawerSection index="04" title="Product media" description="Lead with the clearest image, then add useful alternate views.">
+            <UploadField label="Main image" value={form.image} onChange={(value) => change('image', value)} onStatus={notify} wide />
+            <div className="admin-field field-wide">
+              <span className="field-label"><span>Gallery</span></span>
+              <div className="gallery-grid">
+                {form.gallery.map((url) => (
+                  <div className="gallery-item" key={url}>
+                    <img src={url} alt="" />
+                    <button type="button" onClick={() => change('gallery', form.gallery.filter((item) => item !== url))} aria-label="Remove image"><X size={14} /></button>
+                  </div>
+                ))}
+                <label className="gallery-upload">
+                  {galleryUploading ? <LoaderCircle className="spin" size={19} /> : <ImagePlus size={20} />}
+                  <span>{galleryUploading ? 'Uploading…' : 'Upload'}</span>
+                  <input type="file" accept="image/*" onChange={uploadGallery} disabled={galleryUploading} />
+                </label>
+              </div>
+              <div className="inline-add">
+                <input value={galleryUrl} onChange={(e) => setGalleryUrl(e.target.value)} placeholder="Or paste another image URL" />
+                <button className="secondary-button" type="button" onClick={() => addGalleryUrl()}>Add URL</button>
+              </div>
             </div>
-            <div className="inline-add">
-              <input value={galleryUrl} onChange={(e) => setGalleryUrl(e.target.value)} placeholder="Or paste another image URL" />
-              <button className="secondary-button" type="button" onClick={() => addGalleryUrl()}>Add URL</button>
+          </DrawerSection>
+
+          <DrawerSection index="05" title="Visibility" description="Control where the product appears and whether it can be ordered.">
+            <div className="toggle-row field-wide">
+              <Toggle checked={form.featured} onChange={(value) => change('featured', value)} label="Featured product" description="Show this item in curated homepage areas." />
+              <Toggle checked={form.inStock} onChange={(value) => change('inStock', value)} label="In stock" description="Allow customers to add this item to their selection." />
             </div>
-          </div>
-          <div className="toggle-row field-wide">
-            <Toggle checked={form.featured} onChange={(value) => change('featured', value)} label="Featured product" description="Show this item in curated homepage areas." />
-            <Toggle checked={form.inStock} onChange={(value) => change('inStock', value)} label="In stock" description="Allow customers to see this as currently available." />
-          </div>
+          </DrawerSection>
         </div>
         <div className="drawer-actions">
+          <div className="drawer-actions__copy"><span>Product draft</span><small>Save to publish changes to the storefront.</small></div>
           <button className="secondary-button" type="button" onClick={onClose} disabled={saving || galleryUploading}>Cancel</button>
           <button className="primary-button" type="submit" disabled={saving}><Save size={16} />{saving ? 'Saving…' : 'Save product'}</button>
         </div>
