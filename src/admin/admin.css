@@ -45,6 +45,8 @@ img { display: block; max-width: 100%; }
   border-right: 1px solid var(--admin-line);
   background: #101212;
   transition: transform .25s ease;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .sidebar-brand {
@@ -244,20 +246,20 @@ button:disabled { cursor: wait; opacity: .65; transform: none !important; }
 .empty-state > svg { margin-bottom: 17px; color: var(--admin-accent); }
 .empty-state p { max-width: 360px; margin: 8px 0 20px; color: var(--admin-muted); font-size: 12px; line-height: 1.55; }
 
-.dialog-layer { position: fixed; z-index: 100; inset: 0; }
+.dialog-layer { position: fixed; z-index: 100; inset: 0; height: 100vh; height: 100dvh; overflow: hidden; }
 .dialog-scrim { position: absolute; inset: 0; width: 100%; border: 0; background: rgba(0, 0, 0, .72); cursor: default; animation: fade-in .2s ease both; }
 @keyframes fade-in { from { opacity: 0; } }
-.editor-drawer { position: absolute; inset: 0 0 0 auto; display: flex; width: min(520px, 100%); flex-direction: column; border-left: 1px solid var(--admin-line-strong); background: #121515; box-shadow: -28px 0 60px rgba(0, 0, 0, .3); animation: drawer-in .26s ease both; }
+.editor-drawer { position: absolute; inset: 0 0 0 auto; display: flex; width: min(520px, 100%); max-height: 100dvh; flex-direction: column; overflow: hidden; border-left: 1px solid var(--admin-line-strong); background: #121515; box-shadow: -28px 0 60px rgba(0, 0, 0, .3); animation: drawer-in .26s ease both; }
 .editor-drawer.wide { width: min(760px, 100%); }
 @keyframes drawer-in { from { transform: translateX(30px); opacity: .6; } }
-.editor-drawer header { display: flex; min-height: 88px; align-items: center; justify-content: space-between; padding: 0 28px; border-bottom: 1px solid var(--admin-line); }
+.editor-drawer header { display: flex; min-height: 88px; flex: 0 0 auto; align-items: center; justify-content: space-between; padding: 0 28px; border-bottom: 1px solid var(--admin-line); }
 .editor-drawer header h2 { margin: 5px 0 0; font-family: 'Manrope', sans-serif; font-size: 21px; }
-.drawer-content { min-height: 0; flex: 1; overflow-y: auto; }
-.drawer-form { min-height: 100%; padding: 28px; }
-.drawer-form > .admin-field { margin-bottom: 22px; }
-.drawer-actions { position: sticky; bottom: -28px; z-index: 3; display: flex; justify-content: flex-end; gap: 9px; margin: 34px -28px -28px; padding: 17px 28px; border-top: 1px solid var(--admin-line); background: rgba(18, 21, 21, .96); backdrop-filter: blur(10px); }
+.drawer-content { min-height: 0; flex: 1; overflow: hidden; }
+.drawer-form { display: flex; height: 100%; min-height: 0; flex-direction: column; padding: 0; }
+.drawer-form-body { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 28px; scrollbar-gutter: stable; }
+.drawer-form-body > .admin-field { margin-bottom: 22px; }
+.drawer-actions { z-index: 3; display: flex; flex: 0 0 auto; justify-content: flex-end; gap: 9px; margin: 0; padding: 17px 28px max(17px, env(safe-area-inset-bottom)); border-top: 1px solid var(--admin-line); background: rgba(18, 21, 21, .98); backdrop-filter: blur(10px); }
 .product-form > .form-grid { gap: 20px; }
-.product-form .drawer-actions { bottom: 0; }
 .gallery-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 .gallery-item, .gallery-upload { position: relative; aspect-ratio: 1; overflow: hidden; background: #1c201f; }
 .gallery-item button { position: absolute; top: 5px; right: 5px; display: grid; width: 24px; height: 24px; place-items: center; border: 0; border-radius: 50%; background: rgba(8, 9, 9, .78); color: #fff; cursor: pointer; }
@@ -274,7 +276,7 @@ button:disabled { cursor: wait; opacity: .65; transform: none !important; }
 .toggle-control > span small { margin-top: 4px; color: var(--admin-muted); font-size: 9px; line-height: 1.4; }
 
 .confirm-layer { display: grid; place-items: center; }
-.confirm-dialog { position: relative; width: min(420px, calc(100% - 32px)); padding: 32px; border: 1px solid var(--admin-line-strong); background: #151818; box-shadow: 0 24px 90px rgba(0, 0, 0, .55); animation: confirm-in .2s ease both; }
+.confirm-dialog { position: relative; width: min(420px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; padding: 32px; border: 1px solid var(--admin-line-strong); background: #151818; box-shadow: 0 24px 90px rgba(0, 0, 0, .55); animation: confirm-in .2s ease both; }
 @keyframes confirm-in { from { opacity: 0; transform: scale(.97) translateY(5px); } }
 .confirm-icon { display: grid; width: 42px; height: 42px; margin-bottom: 20px; place-items: center; background: rgba(239, 122, 114, .1); color: var(--admin-danger); }
 .confirm-dialog h2 { margin: 0; font-family: 'Manrope', sans-serif; font-size: 19px; }
@@ -362,6 +364,12 @@ button:disabled { cursor: wait; opacity: .65; transform: none !important; }
   .login-form-panel { min-height: 100svh; padding: 26px; }
   .mobile-login-brand { display: block; margin-bottom: 45px; }
   .mobile-login-brand .login-brand-mark { padding: 10px 0; }
+  .settings-form .mobile-save-bar { position: sticky; z-index: 5; bottom: 0; margin: 24px -20px -70px; padding: 14px 20px max(14px, env(safe-area-inset-bottom)); background: rgba(13, 15, 15, .97); backdrop-filter: blur(10px); }
+  .settings-form .mobile-save-bar .primary-button { width: 100%; min-height: 46px; }
+  .editor-drawer { width: 100%; border-left: 0; }
+  .editor-drawer header { min-height: 72px; }
+  .drawer-form-body { padding: 22px 20px; }
+  .drawer-actions { padding-inline: 20px; }
 }
 
 @media (max-width: 540px) {
@@ -388,8 +396,11 @@ button:disabled { cursor: wait; opacity: .65; transform: none !important; }
   .category-row .row-actions { grid-column: 2; justify-content: flex-start; }
   .gallery-grid { grid-template-columns: repeat(4, 1fr); }
   .inline-add { grid-template-columns: 1fr; }
-  .drawer-form, .editor-drawer header { padding-inline: 20px; }
-  .drawer-actions { margin-inline: -20px; padding-inline: 20px; }
+  .editor-drawer header { padding-inline: 20px; }
+  .drawer-actions > button { min-height: 46px; flex: 1; padding-inline: 12px; }
+  .confirm-dialog { padding: 24px 20px; }
+  .confirm-dialog > div:last-child { flex-direction: column-reverse; }
+  .confirm-dialog > div:last-child button { width: 100%; }
   .toast { right: 16px; bottom: 16px; }
 }
 

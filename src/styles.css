@@ -58,7 +58,7 @@ button { color: inherit; }
 .icon-button:hover { background: rgba(0,0,0,.05); }
 .cart-button span { position: absolute; right: 2px; top: 0; min-width: 17px; height: 17px; border-radius: 99px; display: grid; place-items: center; background: var(--accent); font-size: .61rem; font-weight: 700; }
 .menu-button { display: none; }
-.mobile-menu { position: fixed; inset: 0; z-index: 100; background: var(--black); color: white; padding: 2rem; display: flex; flex-direction: column; }
+.mobile-menu { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; padding: 2rem 2rem max(2rem, env(safe-area-inset-bottom)); background: var(--black); color: white; }
 .mobile-menu__close { position: absolute; right: 1.5rem; top: 1.5rem; color: white; }
 .mobile-menu nav { margin: auto 0; }
 .mobile-menu nav a { display: block; padding: .8rem 0; font: 500 clamp(2rem, 10vw, 3.5rem)/1.05 var(--display); border-bottom: 1px solid rgba(255,255,255,.12); }
@@ -177,7 +177,7 @@ button { color: inherit; }
 .product-gallery { padding: clamp(1rem, 2.5vw, 2.5rem) var(--gutter); background: #e4e0d8; }
 .product-gallery__main { height: min(69vw, 670px); max-height: calc(100vh - 170px); min-height: 500px; position: relative; background: #d4d0c7; }
 .product-gallery__main > img { width: 100%; height: 100%; object-fit: cover; }
-.product-gallery__thumbs { display: flex; gap: .6rem; margin-top: .8rem; }
+.product-gallery__thumbs { display: flex; gap: .6rem; margin-top: .8rem; overflow-x: auto; overscroll-behavior-inline: contain; padding-bottom: .35rem; scrollbar-width: thin; }
 .product-gallery__thumbs button { width: 72px; height: 72px; padding: 0; border: 2px solid transparent; background: transparent; cursor: pointer; }
 .product-gallery__thumbs button.active { border-color: var(--accent); }
 .product-gallery__thumbs img { height: 100%; object-fit: cover; }
@@ -263,7 +263,7 @@ button { color: inherit; }
 .quantity button { width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid var(--line); background: transparent; cursor: pointer; }
 .quantity > span { width: 30px; text-align: center; font-size: .7rem; }
 .quantity .remove { margin-left: auto; border: 0; color: #8e8980; }
-.cart-checkout { padding: 1.5rem; background: #e8e4dc; border-top: 1px solid var(--line); }
+.cart-checkout { padding: 1.5rem 1.5rem max(1.5rem, env(safe-area-inset-bottom)); background: #e8e4dc; border-top: 1px solid var(--line); }
 .cart-checkout > div { display: flex; justify-content: space-between; font-size: .85rem; }
 .cart-checkout > div strong { font-size: 1rem; }
 .cart-checkout p { color: #77736c; font-size: .64rem; line-height: 1.5; margin: 1rem 0; }
@@ -342,7 +342,7 @@ button { color: inherit; }
   .catalog-toolbar { gap: .7rem; }
   .result-count { display: none; }
   .catalog-layout { display: block; }
-  .filters { display: none; position: fixed; inset: 0; z-index: 60; background: var(--paper); padding: 2rem; overflow: auto; }
+  .filters { display: none; position: fixed; inset: 0; z-index: 60; background: var(--paper); padding: 2rem 2rem max(2rem, env(safe-area-inset-bottom)); overflow: auto; overscroll-behavior: contain; }
   .filters-visible .filters { display: block; }
   .filters__head button { display: block; }
   .catalog-results .product-grid { grid-template-columns: 1fr; }
@@ -358,6 +358,23 @@ button { color: inherit; }
   .contact-primary { min-height: 340px; }
   .contact-details > * { padding: 1.3rem; }
   .map-frame { height: 390px; }
+}
+
+@media (max-width: 380px) {
+  .site-header { padding-inline: 1rem; }
+  .logo { min-width: 0; }
+  .logo > span:last-child { min-width: 0; }
+  .logo strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .logo small { display: none; }
+  .header-actions { gap: .2rem; }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .hero { height: auto; min-height: 430px; }
+  .hero__content { padding-top: 4rem; padding-bottom: 4rem; }
+  .workshop-hero { height: auto; min-height: 430px; }
+  .mobile-menu nav { margin: 3.5rem 0 2rem; }
+  .product-gallery__main { min-height: 320px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

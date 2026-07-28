@@ -629,9 +629,11 @@ function CategoryEditor({ category, onClose, onSave, notify }) {
   return (
     <EditorDrawer title={category.id ? 'Edit category' : 'New category'} onClose={onClose}>
       <form className="drawer-form" onSubmit={submit}>
-        <Field label="Category name" required><input autoFocus value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
-        <Field label="Description"><textarea rows="5" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
-        <UploadField label="Category image" value={form.image} onChange={(value) => setForm({ ...form, image: value })} onStatus={notify} />
+        <div className="drawer-form-body">
+          <Field label="Category name" required><input autoFocus value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
+          <Field label="Description"><textarea rows="5" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
+          <UploadField label="Category image" value={form.image} onChange={(value) => setForm({ ...form, image: value })} onStatus={notify} />
+        </div>
         <div className="drawer-actions">
           <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
           <button className="primary-button" type="submit" disabled={saving}><Save size={16} />{saving ? 'Saving…' : 'Save category'}</button>
@@ -831,7 +833,7 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
   return (
     <EditorDrawer title={product.id ? 'Edit product' : 'Add product'} wide onClose={onClose}>
       <form className="drawer-form product-form" onSubmit={submit}>
-        <div className="form-grid">
+        <div className="drawer-form-body form-grid">
           <Field label="Product name" required wide><input autoFocus value={form.name} onChange={(e) => handleNameChange(e.target.value)} required /></Field>
           <Field label="URL slug" required><input value={form.slug} onChange={(e) => change('slug', slugify(e.target.value))} required /></Field>
           <Field label="Brand"><input value={form.brand} onChange={(e) => change('brand', e.target.value)} /></Field>
