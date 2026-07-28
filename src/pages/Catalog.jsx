@@ -1,14 +1,16 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import { useStore } from '../context/store'
+import { useOverlayDialog } from '../hooks/useOverlayDialog'
 import { useSeo } from '../hooks/useSeo'
 
 export default function Catalog() {
   const { products, categories } = useStore()
   const [params, setParams] = useSearchParams()
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const { overlayRef, triggerRef } = useOverlayDialog(filtersOpen, () => setFiltersOpen(false))
   const query = params.get('q') || ''
   const category = params.get('categorie') || ''
   const brand = params.get('marque') || ''
@@ -16,11 +18,16 @@ export default function Catalog() {
   const year = params.get('annee') || ''
   useSeo('Catalogue', 'Accessoires automobiles premium, disponibles et installés à Tanger.')
 
-  const options = useMemo(() => ({
-    brands: [...new Set(products.map((p) => p.brand).filter(Boolean))].sort(),
-    models: [...new Set(products.flatMap((p) => p.vehicleModels || []))].sort(),
-    years: [...new Set(products.flatMap((p) => p.years || []))].sort(),
-  }), [products])
+  const options = useMemo(() => {
+    const inCategory = products.filter((product) => !category || product.category === category)
+    const inBrand = inCategory.filter((product) => !brand || product.brand === brand)
+    const inModel = inBrand.filter((product) => !model || product.vehicleModels?.includes(model))
+    return {
+      brands: [...new Set(inCategory.map((product) => product.brand).filter(Boolean))].sort(),
+      models: [...new Set(inBrand.flatMap((product) => product.vehicleModels || []))].sort(),
+      years: [...new Set(inModel.flatMap((product) => product.years || []))].sort(),
+    }
+  }, [products, category, brand, model])
 
   const results = useMemo(() => {
     const needle = query.trim().toLowerCase()
@@ -34,10 +41,22 @@ export default function Catalog() {
     })
   }, [products, query, category, brand, model, year])
 
-  const setFilter = (key, value) => {
+  useEffect(() => {
+    const desktop = window.matchMedia('(min-width: 821px)')
+    const closeOnDesktop = (event) => {
+      if (event.matches) setFiltersOpen(false)
+    }
+    desktop.addEventListener('change', closeOnDesktop)
+    return () => desktop.removeEventListener('change', closeOnDesktop)
+  }, [])
+
+  const setFilter = (key, value, replace = false) => {
     const next = new URLSearchParams(params)
     value ? next.set(key, value) : next.delete(key)
-    setParams(next)
+    if (key === 'categorie') ['marque', 'modele', 'annee'].forEach((dependent) => next.delete(dependent))
+    if (key === 'marque') ['modele', 'annee'].forEach((dependent) => next.delete(dependent))
+    if (key === 'modele') next.delete('annee')
+    setParams(next, { replace })
   }
   const hasFilters = query || category || brand || model || year
 
@@ -52,22 +71,26 @@ export default function Catalog() {
         <label className="catalog-search">
           <Search size={19} />
           <span className="sr-only">Rechercher</span>
-          <input value={query} onChange={(event) => setFilter('q', event.target.value)} placeholder="Rechercher un produit, une marque…" />
-          {query && <button onClick={() => setFilter('q', '')} aria-label="Effacer"><X size={17} /></button>}
+          <input value={query} onChange={(event) => setFilter('q', event.target.value, true)} placeholder="Rechercher un produit, une marque…" />
+          {query && <button onClick={() => setFilter('q', '', true)} aria-label="Effacer"><X size={17} /></button>}
         </label>
-        <button className="filter-toggle" onClick={() => setFiltersOpen((value) => !value)}>
+        <button ref={triggerRef} className="filter-toggle" onClick={() => setFiltersOpen((value) => !value)} aria-expanded={filtersOpen} aria-controls="catalog-filters">
           <SlidersHorizontal size={18} /> Filtres
         </button>
-        <span className="result-count">{results.length} référence{results.length !== 1 ? 's' : ''}</span>
+        <span className="result-count" aria-live="polite">{results.length} référence{results.length !== 1 ? 's' : ''}</span>
       </div>
       <div className={`catalog-layout ${filtersOpen ? 'filters-visible' : ''}`}>
-        <aside className="filters" aria-label="Filtres du catalogue">
-          <div className="filters__head"><strong>Affiner</strong><button onClick={() => setFiltersOpen(false)} aria-label="Fermer"><X /></button></div>
+        <aside ref={overlayRef} id="catalog-filters" className="filters" aria-label="Filtres du catalogue" role={filtersOpen ? 'dialog' : undefined} aria-modal={filtersOpen || undefined} data-overlay-root={filtersOpen ? '' : undefined}>
+          <div className="filters__head"><strong>Affiner</strong><button data-overlay-autofocus onClick={() => setFiltersOpen(false)} aria-label="Fermer"><X /></button></div>
           <FilterSelect label="Catégorie" value={category} onChange={(v) => setFilter('categorie', v)} options={categories.map((item) => item.name)} />
           <FilterSelect label="Marque" value={brand} onChange={(v) => setFilter('marque', v)} options={options.brands} />
           <FilterSelect label="Modèle" value={model} onChange={(v) => setFilter('modele', v)} options={options.models} />
           <FilterSelect label="Année" value={year} onChange={(v) => setFilter('annee', v)} options={options.years} />
           {hasFilters && <button className="clear-filters" onClick={() => setParams({})}>Tout effacer</button>}
+          <div className="filter-actions">
+            {hasFilters && <button className="button button--outline" onClick={() => setParams({})}>Réinitialiser</button>}
+            <button className="button button--dark" onClick={() => setFiltersOpen(false)}>Voir {results.length} résultat{results.length !== 1 ? 's' : ''}</button>
+          </div>
         </aside>
         <section className="catalog-results">
           {results.length ? (

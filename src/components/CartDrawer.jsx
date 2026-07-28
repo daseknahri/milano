@@ -1,11 +1,14 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react'
-import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
+import { Link } from 'react-router-dom'
 import { useStore } from '../context/store'
+import { useOverlayDialog } from '../hooks/useOverlayDialog'
 import { formatPrice, imageFallback, productPriceLabel, whatsappLink } from '../utils'
 
 export default function CartDrawer() {
   const { cart, cartOpen, setCartOpen, updateQuantity, settings } = useStore()
+  const { overlayRef } = useOverlayDialog(cartOpen, () => setCartOpen(false))
   const total = cart.reduce((sum, item) => sum + Number(item.price || 0) * item.quantity, 0)
   const hasQuoteItems = cart.some((item) => !Number(item.price))
   const orderText = [
@@ -15,15 +18,10 @@ export default function CartDrawer() {
     'Pouvez-vous me confirmer la disponibilité et l’installation ?',
   ].join('\n')
 
-  useEffect(() => {
-    document.body.classList.toggle('drawer-open', cartOpen)
-    return () => document.body.classList.remove('drawer-open')
-  }, [cartOpen])
-
-  return (
+  return createPortal(
     <AnimatePresence>
       {cartOpen && (
-        <div className="drawer-layer">
+        <div ref={overlayRef} className="drawer-layer" role="dialog" aria-modal="true" aria-label="Votre sélection" data-overlay-root>
           <motion.button
             className="drawer-backdrop"
             aria-label="Fermer le panier"
@@ -45,7 +43,7 @@ export default function CartDrawer() {
                 <span className="eyebrow">Votre sélection</span>
                 <h2>Panier <small>{cart.length}</small></h2>
               </div>
-              <button className="icon-button" onClick={() => setCartOpen(false)} aria-label="Fermer"><X /></button>
+              <button data-overlay-autofocus className="icon-button" onClick={() => setCartOpen(false)} aria-label="Fermer"><X /></button>
             </header>
             {cart.length ? (
               <>
@@ -54,7 +52,7 @@ export default function CartDrawer() {
                     <article className="cart-item" key={item.id}>
                       <img src={item.image} alt="" onError={imageFallback} />
                       <div>
-                        <h3>{item.name}</h3>
+                        <Link to={`/produit/${item.slug}`} onClick={() => setCartOpen(false)}><h3>{item.name}</h3></Link>
                         <span>{productPriceLabel(item)}</span>
                         <div className="quantity">
                           <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Réduire"><Minus size={14} /></button>
@@ -79,12 +77,13 @@ export default function CartDrawer() {
                 <ShoppingBag size={36} strokeWidth={1.4} />
                 <h3>Votre sélection est vide.</h3>
                 <p>Découvrez les équipements choisis par notre atelier.</p>
-                <button className="text-link" onClick={() => setCartOpen(false)}>Continuer mes achats</button>
+                <Link className="text-link" to="/catalogue" onClick={() => setCartOpen(false)}>Continuer mes achats</Link>
               </div>
             )}
           </motion.aside>
         </div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }

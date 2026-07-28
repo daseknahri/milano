@@ -11,12 +11,21 @@ export default function ProductDetail() {
   const { slug } = useParams()
   const { products, addToCart, settings } = useStore()
   const product = products.find((item) => item.slug === slug || String(item.id) === slug)
-  const [activeImage, setActiveImage] = useState(0)
+  const [gallerySelection, setGallerySelection] = useState({ productId: '', index: 0 })
   useSeo(product?.name || 'Produit', product?.description || 'Accessoire automobile Milan.')
 
   if (!product) return <NotFound compact />
   const gallery = product.gallery?.length ? product.gallery : [product.image]
+  const activeImage = gallerySelection.productId === String(product.id) ? gallerySelection.index : 0
+  const displayedImage = Math.min(activeImage, gallery.length - 1)
   const related = products.filter((item) => item.id !== product.id && item.category === product.category).slice(0, 3)
+
+  function moveGallery(direction) {
+    setGallerySelection({
+      productId: String(product.id),
+      index: (displayedImage + direction + gallery.length) % gallery.length,
+    })
+  }
   const inquiry = `Bonjour Milan, je souhaite vérifier la compatibilité de « ${product.name} » avec mon véhicule.`
 
   return (
@@ -25,13 +34,20 @@ export default function ProductDetail() {
       <section className="product-detail">
         <div className="product-gallery">
           <div className="product-gallery__main">
-            <img src={gallery[activeImage]} alt={`${product.name}, vue ${activeImage + 1}`} onError={imageFallback} />
+            <img src={gallery[displayedImage]} alt={`${product.name}, vue ${displayedImage + 1}`} onError={imageFallback} />
             {product.badge && <span className="product-badge">{product.badge}</span>}
+            {gallery.length > 1 && (
+              <div className="gallery-navigation" aria-label="Navigation de la galerie">
+                <button onClick={() => moveGallery(-1)} aria-label="Image précédente"><ArrowLeft size={19} /></button>
+                <span>{displayedImage + 1} / {gallery.length}</span>
+                <button onClick={() => moveGallery(1)} aria-label="Image suivante"><ArrowRight size={19} /></button>
+              </div>
+            )}
           </div>
           {gallery.length > 1 && (
             <div className="product-gallery__thumbs">
               {gallery.map((image, index) => (
-                <button className={index === activeImage ? 'active' : ''} onClick={() => setActiveImage(index)} key={image}>
+                <button className={index === displayedImage ? 'active' : ''} onClick={() => setGallerySelection({ productId: String(product.id), index })} aria-label={`Afficher la vue ${index + 1}`} aria-pressed={index === displayedImage} key={image}>
                   <img src={image} alt={`Vue ${index + 1}`} onError={imageFallback} />
                 </button>
               ))}

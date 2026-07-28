@@ -76,6 +76,17 @@ export function StoreProvider({ children }) {
     localStorage.setItem('milan-cart', JSON.stringify(cart))
   }, [cart])
 
+  const hydratedCart = useMemo(() => {
+    if (loading) return cart
+    const currentProducts = new Map(content.products.map((product) => [String(product.id), product]))
+    return cart
+      .map((item) => {
+        const latest = currentProducts.get(String(item.id))
+        return latest ? { ...latest, quantity: item.quantity } : null
+      })
+      .filter(Boolean)
+  }, [cart, content.products, loading])
+
   const addToCart = useCallback((product) => {
     setCart((current) => {
       const found = current.find((item) => item.id === product.id)
@@ -101,14 +112,14 @@ export function StoreProvider({ children }) {
       ...content,
       loading,
       usingFallback,
-      cart,
+      cart: hydratedCart,
       cartOpen,
       setCartOpen,
       addToCart,
       updateQuantity,
-      cartCount: cart.reduce((sum, item) => sum + item.quantity, 0),
+      cartCount: hydratedCart.reduce((sum, item) => sum + item.quantity, 0),
     }),
-    [content, loading, usingFallback, cart, cartOpen, addToCart, updateQuantity],
+    [content, loading, usingFallback, hydratedCart, cartOpen, addToCart, updateQuantity],
   )
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

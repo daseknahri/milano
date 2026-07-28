@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { ArrowDown, ArrowRight, ArrowUpRight, Check, ChevronRight, Gauge, ShieldCheck, Wrench } from 'lucide-react'
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
@@ -10,25 +10,27 @@ import { imageFallback, whatsappLink } from '../utils'
 export default function Home() {
   const { settings, categories, products } = useStore()
   const heroRef = useRef(null)
+  const reduceMotion = useReducedMotion()
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
   const imageY = useTransform(scrollYProgress, [0, 1], ['0%', '14%'])
-  const featured = products.filter((product) => product.featured).slice(0, 3)
+  const curated = products.filter((product) => product.featured)
+  const featured = (curated.length ? curated : products).slice(0, 3)
   useSeo('Accessoires auto premium à Tanger', settings.heroSubtitle)
 
   return (
-    <>
+    <main>
       <section className="hero" ref={heroRef}>
         <motion.img
           className="hero__image"
           src={settings.heroImage}
           alt="Automobile premium dans un environnement urbain"
           onError={imageFallback}
-          style={{ y: imageY }}
+          style={{ y: reduceMotion ? 0 : imageY }}
         />
         <div className="hero__shade" />
         <motion.div
           className="hero__content"
-          initial="hidden"
+          initial={reduceMotion ? false : 'hidden'}
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.1, delayChildren: 0.14 } } }}
         >
@@ -113,7 +115,7 @@ export default function Home() {
         </a>
         <div className="conversion__note"><Check size={16} /> Réponse rapide pendant les horaires d’ouverture</div>
       </section>
-    </>
+    </main>
   )
 }
 

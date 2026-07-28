@@ -1,8 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu, Search, ShoppingBag, X } from 'lucide-react'
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, NavLink } from 'react-router-dom'
 import { useStore } from '../context/store'
+import { useOverlayDialog } from '../hooks/useOverlayDialog'
 import Logo from './Logo'
 
 const links = [
@@ -15,6 +17,7 @@ const links = [
 export default function Header() {
   const { settings, cartCount, setCartOpen } = useStore()
   const [menuOpen, setMenuOpen] = useState(false)
+  const { overlayRef, triggerRef } = useOverlayDialog(menuOpen, () => setMenuOpen(false))
   return (
     <>
       <div className="announcement">{settings.announcement}</div>
@@ -33,20 +36,25 @@ export default function Header() {
             <ShoppingBag size={19} />
             {cartCount > 0 && <span>{cartCount}</span>}
           </button>
-          <button className="icon-button menu-button" onClick={() => setMenuOpen(true)} aria-label="Ouvrir le menu">
+          <button ref={triggerRef} className="icon-button menu-button" onClick={() => setMenuOpen(true)} aria-label="Ouvrir le menu" aria-expanded={menuOpen}>
             <Menu size={21} />
           </button>
         </div>
       </header>
-      <AnimatePresence>
+      {createPortal(<AnimatePresence>
         {menuOpen && (
           <motion.div
+            ref={overlayRef}
             className="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation"
+            data-overlay-root
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <button className="icon-button mobile-menu__close" onClick={() => setMenuOpen(false)} aria-label="Fermer le menu"><X /></button>
+            <button data-overlay-autofocus className="icon-button mobile-menu__close" onClick={() => setMenuOpen(false)} aria-label="Fermer le menu"><X /></button>
             <Logo light />
             <nav aria-label="Navigation mobile">
               {links.map(([to, label], index) => (
@@ -58,7 +66,7 @@ export default function Header() {
             <p>{settings.address}<br />{settings.hours}</p>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence>, document.body)}
     </>
   )
 }
