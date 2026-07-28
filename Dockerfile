@@ -21,5 +21,5 @@ RUN mkdir -p /app/storage/uploads && chown -R node:node /app/storage
 USER node
 EXPOSE 3008
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:3008/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3008)+'/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
 CMD ["node", "server.cjs"]

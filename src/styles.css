@@ -88,6 +88,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .button--dark:hover { background: #2a2927; }
 .button--outline { border-color: var(--line); background: transparent; }
 .button--outline:hover { border-color: var(--ink); }
+.button:disabled { cursor: not-allowed; opacity: .55; transform: none; }
 .hero__scroll { position: absolute; left: var(--gutter); bottom: 1.8rem; z-index: 2; display: flex; align-items: center; gap: .6rem; font-size: .65rem; letter-spacing: .16em; text-transform: uppercase; }
 
 .finder-strip { background: var(--black); color: white; display: grid; grid-template-columns: 1fr minmax(300px, .65fr); align-items: center; padding: 2rem var(--gutter); gap: 2rem; border-top: 1px solid rgba(255,255,255,.1); }
@@ -113,7 +114,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .product-price { display: flex; gap: .55rem; align-items: center; margin-top: .5rem; font-size: .77rem; }
 .product-price del { color: #999; }
 .quick-add { flex: 0 0 42px; height: 42px; border: 1px solid var(--line); background: transparent; cursor: pointer; display: grid; place-items: center; transition: all .25s; }
-.quick-add:hover { background: var(--ink); color: white; border-color: var(--ink); }
+.quick-add:hover:not(:disabled) { background: var(--ink); color: white; border-color: var(--ink); }
+.quick-add:disabled { cursor: not-allowed; opacity: .38; }
 
 .category-editorial { background: var(--black); color: white; display: grid; grid-template-columns: .8fr 1.2fr; padding: clamp(5rem, 9vw, 9rem) var(--gutter); gap: clamp(3rem, 8vw, 9rem); }
 .category-intro { position: sticky; top: 3rem; align-self: start; }
@@ -241,15 +243,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .contact-page { padding-bottom: clamp(5rem, 9vw, 9rem); }
 .contact-heading { background: var(--paper); }
 .contact-grid { display: grid; grid-template-columns: 1fr 1fr; margin: 0 var(--gutter); border: 1px solid var(--line); }
-.contact-primary { min-height: 440px; padding: clamp(2rem, 4vw, 4rem); display: flex; flex-direction: column; background: var(--black); color: white; position: relative; transition: background .25s; }
+.contact-primary { min-width: 0; min-height: 440px; padding: clamp(2rem, 4vw, 4rem); display: flex; flex-direction: column; background: var(--black); color: white; position: relative; transition: background .25s; }
 .contact-primary:hover { background: #181817; }
 .contact-primary > svg:last-child { position: absolute; right: 2rem; top: 2rem; color: var(--accent); }
 .contact-primary > div { margin-top: auto; }
 .contact-primary span { color: var(--accent); font-size: .63rem; letter-spacing: .16em; text-transform: uppercase; }
 .contact-primary h2 { margin: .7rem 0; font: 500 clamp(1.8rem, 3.5vw, 3.2rem)/1 var(--display); letter-spacing: -.04em; }
 .contact-primary p { max-width: 400px; color: #888; font-size: .78rem; line-height: 1.7; }
-.contact-details { background: var(--cream); }
-.contact-details > * { min-height: 110px; padding: 1.5rem 2rem; display: grid; grid-template-columns: 30px 1fr auto; gap: 1rem; align-items: center; border-bottom: 1px solid var(--line); font-size: .82rem; }
+.contact-details { min-width: 0; background: var(--cream); }
+.contact-details > * { min-width: 0; min-height: 110px; padding: 1.5rem 2rem; display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 1rem; align-items: center; border-bottom: 1px solid var(--line); font-size: .82rem; }
+.contact-details > * span { min-width: 0; overflow-wrap: anywhere; }
 .contact-details > *:last-child { border: 0; }
 .contact-details small { display: block; color: #817d76; font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; margin-bottom: .35rem; }
 .contact-details a:hover { background: rgba(255,255,255,.25); }
@@ -272,6 +275,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .cart-item > img { width: 95px; height: 110px; object-fit: cover; }
 .cart-item h3 { font: 600 .85rem/1.3 var(--display); margin: .3rem 0 .45rem; }
 .cart-item > div > span { font-size: .73rem; }
+.cart-item__unavailable { display: block; margin-top: .45rem; color: #9a432f; font-size: .65rem; line-height: 1.35; }
 .quantity { display: flex; align-items: center; margin-top: 1rem; }
 .quantity button { width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid var(--line); background: transparent; cursor: pointer; }
 .quantity > span { width: 30px; text-align: center; font-size: .7rem; }
@@ -292,6 +296,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .not-found h1 { font: 500 clamp(2rem, 4vw, 4rem)/1 var(--display); letter-spacing: -.04em; margin: 1rem 0; }
 .not-found p { color: var(--muted); margin-bottom: 2rem; }
 .page-loader { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 1rem; background: var(--black); color: white; }
+.fatal-error { display: flex; min-height: 100vh; min-height: 100dvh; align-items: center; flex-direction: column; justify-content: center; padding: 2rem; background: var(--black); color: white; text-align: center; }
+.fatal-error > span { display: grid; width: 54px; height: 54px; margin-bottom: 2rem; place-items: center; border: 1px solid var(--accent); color: var(--accent); font: 600 1.2rem var(--display); }
+.fatal-error h1 { max-width: 680px; margin: .8rem 0 1rem; font: 500 clamp(2rem, 5vw, 4rem)/1 var(--display); letter-spacing: -.045em; }
+.fatal-error > p:not(.eyebrow) { max-width: 500px; margin: 0 0 2rem; color: #aaa; line-height: 1.7; }
+.fatal-error__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; }
+.store-status { position: relative; z-index: 25; display: flex; min-height: 42px; align-items: center; justify-content: center; gap: 1rem; padding: .65rem var(--gutter); background: #8f6427; color: white; font-size: .72rem; line-height: 1.4; text-align: center; }
+.store-status button { border: 0; border-bottom: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; font: inherit; font-weight: 700; }
 .loader-mark { color: var(--accent); font: 600 3rem var(--display); }
 .loader-line { width: 80px; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: pulse 1s infinite; }
 @keyframes pulse { 50% { transform: scaleX(.4); opacity: .4; } }

@@ -4,6 +4,7 @@ const crypto = require('node:crypto');
 
 const STORAGE_DIR = path.resolve(process.env.STORAGE_DIR || path.join(process.cwd(), 'storage'));
 const DATA_FILE = path.join(STORAGE_DIR, 'content.json');
+const BACKUP_FILE = path.join(STORAGE_DIR, 'content.backup.json');
 const SEED_FILE = path.join(__dirname, 'data', 'content.seed.json');
 
 let writeQueue = Promise.resolve();
@@ -27,7 +28,7 @@ function cleanMultiline(value, max = 2000) {
 function cleanUrl(value, max = 1000) {
   const candidate = cleanText(value, max);
   if (!candidate) return '';
-  if (candidate.startsWith('/assets/') || candidate.startsWith('/uploads/')) return candidate;
+  if (/^\/(?:assets|uploads)\/[a-zA-Z0-9][a-zA-Z0-9._/-]*$/.test(candidate) && !candidate.includes('..')) return candidate;
   try {
     const parsed = new URL(candidate);
     return ['http:', 'https:'].includes(parsed.protocol) ? parsed.toString().slice(0, max) : '';
@@ -66,7 +67,7 @@ function sanitizeSettings(input = {}, previous = {}) {
     phone: cleanText(merged.phone, 40),
     whatsapp: cleanText(merged.whatsapp, 40),
     email: cleanText(merged.email, 180),
-    instagram: cleanText(merged.instagram, 120).replace(/^@/, ''),
+    instagram: cleanUrl(merged.instagram, 300),
     mapUrl: cleanUrl(merged.mapUrl),
     hours: cleanText(merged.hours, 240),
     currency: cleanText(merged.currency, 8) || 'MAD',
@@ -166,6 +167,14 @@ async function ensureStorage() {
 async function atomicWrite(content) {
   const tempFile = `${DATA_FILE}.${process.pid}.${crypto.randomBytes(5).toString('hex')}.tmp`;
   await fs.writeFile(tempFile, `${JSON.stringify(content, null, 2)}\n`, { encoding: 'utf8', flag: 'wx' });
+  try {
+    await fs.copyFile(DATA_FILE, BACKUP_FILE);
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      await fs.rm(tempFile, { force: true });
+      throw error;
+    }
+  }
   await fs.rename(tempFile, DATA_FILE);
 }
 
@@ -174,7 +183,16 @@ async function readContent() {
   try {
     return sanitizeContent(JSON.parse(await fs.readFile(DATA_FILE, 'utf8')));
   } catch (error) {
-    throw new Error(`Unable to read persisted content: ${error.message}`);
+    try {
+      const recovered = sanitizeContent(JSON.parse(await fs.readFile(BACKUP_FILE, 'utf8')));
+      const corruptFile = `${DATA_FILE}.${Date.now()}.corrupt`;
+      await fs.rename(DATA_FILE, corruptFile).catch(() => {});
+      await atomicWrite(recovered);
+      console.error(`Recovered persisted content from backup after: ${error.message}`);
+      return recovered;
+    } catch (backupError) {
+      throw new Error(`Unable to read persisted content: ${error.message}; backup recovery failed: ${backupError.message}`);
+    }
   }
 }
 

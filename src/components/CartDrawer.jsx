@@ -11,6 +11,7 @@ export default function CartDrawer() {
   const { overlayRef } = useOverlayDialog(cartOpen, () => setCartOpen(false))
   const total = cart.reduce((sum, item) => sum + Number(item.price || 0) * item.quantity, 0)
   const hasQuoteItems = cart.some((item) => !Number(item.price))
+  const hasUnavailableItems = cart.some((item) => item.inStock === false)
   const orderText = [
     'Bonjour Milan Automobile Accessoires, je souhaite commander :',
     ...cart.map((item) => `• ${item.name} × ${item.quantity} — ${Number(item.price) ? formatPrice(item.price * item.quantity) : productPriceLabel(item)}`),
@@ -54,6 +55,7 @@ export default function CartDrawer() {
                       <div>
                         <Link to={`/produit/${item.slug}`} onClick={() => setCartOpen(false)}><h3>{item.name}</h3></Link>
                         <span>{productPriceLabel(item)}</span>
+                        {item.inStock === false && <strong className="cart-item__unavailable">Indisponible — retirez cet article pour commander</strong>}
                         <div className="quantity">
                           <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Réduire"><Minus size={14} /></button>
                           <span>{item.quantity}</span>
@@ -67,9 +69,13 @@ export default function CartDrawer() {
                 <div className="cart-checkout">
                   <div><span>{hasQuoteItems ? 'Devis personnalisé' : 'Total indicatif'}</span><strong>{hasQuoteItems ? 'À confirmer' : formatPrice(total)}</strong></div>
                   <p>Disponibilité et compatibilité confirmées par notre équipe avant paiement.</p>
-                  <a className="button button--accent" href={whatsappLink(settings.whatsapp, orderText)} target="_blank" rel="noreferrer">
-                    Commander sur WhatsApp <ArrowUpRight size={18} />
-                  </a>
+                  {hasUnavailableItems ? (
+                    <button className="button button--accent" type="button" disabled>Retirez les articles indisponibles</button>
+                  ) : (
+                    <a className="button button--accent" href={whatsappLink(settings.whatsapp, orderText)} target="_blank" rel="noreferrer">
+                      Commander sur WhatsApp <ArrowUpRight size={18} />
+                    </a>
+                  )}
                 </div>
               </>
             ) : (

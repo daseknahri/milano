@@ -15,7 +15,19 @@ export default function Home() {
   const imageY = useTransform(scrollYProgress, [0, 1], ['0%', '14%'])
   const curated = products.filter((product) => product.featured)
   const featured = (curated.length ? curated : products).slice(0, 3)
-  useSeo('Accessoires auto premium à Tanger', settings.heroSubtitle)
+  useSeo('Accessoires auto premium à Tanger', settings.heroSubtitle, {
+    image: settings.heroImage,
+    schema: {
+      '@context': 'https://schema.org',
+      '@type': 'AutomotiveBusiness',
+      name: settings.brandName || 'Milan Automobile Accessoires',
+      image: settings.heroImage,
+      telephone: settings.phone,
+      address: settings.address,
+      url: window.location.origin,
+      sameAs: settings.instagram ? [settings.instagram] : [],
+    },
+  })
 
   return (
     <main>
@@ -24,6 +36,7 @@ export default function Home() {
           className="hero__image"
           src={settings.heroImage}
           alt="Automobile premium dans un environnement urbain"
+          fetchPriority="high"
           onError={imageFallback}
           style={{ y: reduceMotion ? 0 : imageY }}
         />

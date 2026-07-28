@@ -2,6 +2,9 @@ const crypto = require('node:crypto');
 
 const COOKIE_NAME = 'milan_admin';
 const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const MAX_SESSIONS = 200;
+const MAX_ATTEMPT_KEYS = 2000;
 const sessions = new Map();
 const loginAttempts = new Map();
 
@@ -30,12 +33,18 @@ function signature(id) {
 }
 
 function createToken() {
+  pruneAuthState();
+  if (sessions.size >= MAX_SESSIONS) {
+    const oldest = [...sessions.entries()].sort((left, right) => left[1].createdAt - right[1].createdAt)[0];
+    if (oldest) sessions.delete(oldest[0]);
+  }
   const id = crypto.randomBytes(32).toString('base64url');
   sessions.set(id, { createdAt: Date.now(), expiresAt: Date.now() + SESSION_TTL_MS });
   return `${id}.${signature(id)}`;
 }
 
 function tokenId(token) {
+  pruneAuthState();
   const [id, providedSignature] = String(token || '').split('.');
   if (!id || !providedSignature || !safeEqual(signature(id), providedSignature)) return null;
   const session = sessions.get(id);
@@ -51,39 +60,65 @@ function cookieOptions() {
     httpOnly: true,
     secure: process.env.COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
     sameSite: 'strict',
+    priority: 'high',
     maxAge: SESSION_TTL_MS,
     path: '/',
   };
 }
 
-function isRateLimited(ip) {
-  const key = String(ip || 'unknown');
+function pruneAuthState(now = Date.now()) {
+  for (const [id, session] of sessions) {
+    if (session.expiresAt <= now) sessions.delete(id);
+  }
+  for (const [key, attempts] of loginAttempts) {
+    const recent = attempts.filter((time) => time > now - LOGIN_WINDOW_MS);
+    if (recent.length) loginAttempts.set(key, recent);
+    else loginAttempts.delete(key);
+  }
+  while (loginAttempts.size > MAX_ATTEMPT_KEYS) {
+    loginAttempts.delete(loginAttempts.keys().next().value);
+  }
+}
+
+function attemptKeys(ip, identifier) {
+  return [`ip:${String(ip || 'unknown')}`, `id:${String(identifier || 'unknown')}`];
+}
+
+function isRateLimited(ip, identifier) {
+  pruneAuthState();
   const now = Date.now();
-  const recent = (loginAttempts.get(key) || []).filter((time) => time > now - 15 * 60 * 1000);
-  loginAttempts.set(key, recent);
-  return recent.length >= 8;
+  const [ipKey, identifierKey] = attemptKeys(ip, identifier);
+  const ipRecent = (loginAttempts.get(ipKey) || []).filter((time) => time > now - LOGIN_WINDOW_MS);
+  const identifierRecent = (loginAttempts.get(identifierKey) || []).filter((time) => time > now - LOGIN_WINDOW_MS);
+  loginAttempts.set(ipKey, ipRecent);
+  loginAttempts.set(identifierKey, identifierRecent);
+  return ipRecent.length >= 8 || identifierRecent.length >= 12;
 }
 
-function recordFailure(ip) {
-  const key = String(ip || 'unknown');
-  loginAttempts.set(key, [...(loginAttempts.get(key) || []), Date.now()].slice(-12));
+function recordFailure(ip, identifier) {
+  for (const key of attemptKeys(ip, identifier)) {
+    loginAttempts.set(key, [...(loginAttempts.get(key) || []), Date.now()].slice(-16));
+  }
 }
 
-function clearFailures(ip) {
-  loginAttempts.delete(String(ip || 'unknown'));
+function clearFailures(ip, identifier) {
+  for (const key of attemptKeys(ip, identifier)) loginAttempts.delete(key);
 }
 
 function login(req, res) {
-  if (isRateLimited(req.ip)) return res.status(429).json({ error: 'Trop de tentatives. Réessayez dans quelques minutes.' });
   const identifier = String(req.body?.email || req.body?.username || '').trim().toLowerCase();
   const password = String(req.body?.password || '');
+  if (isRateLimited(req.ip, identifier)) {
+    res.set('Retry-After', String(Math.ceil(LOGIN_WINDOW_MS / 1000)));
+    return res.status(429).json({ error: 'Trop de tentatives. Réessayez dans quelques minutes.' });
+  }
   const matchesEmail = safeEqual(identifier, adminEmail);
   const matchesUsername = safeEqual(identifier, adminUsername);
   if ((!matchesEmail && !matchesUsername) || !safeEqual(password, adminPassword)) {
-    recordFailure(req.ip);
+    recordFailure(req.ip, identifier);
     return res.status(401).json({ error: 'Identifiants incorrects.' });
   }
-  clearFailures(req.ip);
+  clearFailures(req.ip, identifier);
   res.cookie(COOKIE_NAME, createToken(), cookieOptions());
   return res.json({ authenticated: true, email: adminEmail, username: adminUsername });
 }
@@ -97,7 +132,7 @@ function logout(req, res) {
 
 function getSession(req, res) {
   const authenticated = Boolean(tokenId(req.cookies?.[COOKIE_NAME]));
-  return res.status(authenticated ? 200 : 401).json({
+  return res.json({
     authenticated,
     ...(authenticated ? { email: adminEmail, username: adminUsername } : {}),
   });

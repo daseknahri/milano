@@ -5,6 +5,7 @@ import Footer from './components/Footer'
 import Header from './components/Header'
 import PageLoader from './components/PageLoader'
 import { StoreProvider } from './context/StoreContext'
+import { useStore } from './context/store'
 import Catalog from './pages/Catalog'
 import Contact from './pages/Contact'
 import Home from './pages/Home'
@@ -48,6 +49,7 @@ function SiteRoutes() {
   return (
     <>
       <RouteReset />
+      <StoreStatus />
       <a className="skip-link" href="#main-content">Aller au contenu</a>
       <Header />
       <div id="main-content" tabIndex="-1">
@@ -63,6 +65,17 @@ function SiteRoutes() {
       <Footer />
       <CartDrawer />
     </>
+  )
+}
+
+function StoreStatus() {
+  const { usingFallback, retryContent } = useStore()
+  if (!usingFallback) return null
+  return (
+    <div className="store-status" role="alert">
+      <span>Le catalogue en direct est momentanément indisponible. Une sélection de secours est affichée.</span>
+      <button type="button" onClick={retryContent}>Réessayer</button>
+    </div>
   )
 }
 

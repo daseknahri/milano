@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, Check, MessageCircle, ShieldCheck, ShoppingBag, 
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
+import PageLoader from '../components/PageLoader'
 import { useStore } from '../context/store'
 import { useSeo } from '../hooks/useSeo'
 import { formatPrice, imageFallback, productPriceLabel, whatsappLink } from '../utils'
@@ -9,11 +10,31 @@ import NotFound from './NotFound'
 
 export default function ProductDetail() {
   const { slug } = useParams()
-  const { products, addToCart, settings } = useStore()
+  const { products, addToCart, settings, loading } = useStore()
   const product = products.find((item) => item.slug === slug || String(item.id) === slug)
   const [gallerySelection, setGallerySelection] = useState({ productId: '', index: 0 })
-  useSeo(product?.name || 'Produit', product?.description || 'Accessoire automobile Milan.')
+  useSeo(product?.name || 'Produit', product?.description || 'Accessoire automobile Milan.', {
+    image: product?.image,
+    noindex: !loading && !product,
+    type: product ? 'product' : 'website',
+    schema: product ? {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      image: product.gallery?.length ? product.gallery : [product.image],
+      description: product.description,
+      brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+      offers: Number(product.price) > 0 ? {
+        '@type': 'Offer',
+        priceCurrency: 'MAD',
+        price: Number(product.price),
+        availability: product.inStock === false ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock',
+        url: window.location.href,
+      } : undefined,
+    } : undefined,
+  })
 
+  if (loading && !product) return <PageLoader />
   if (!product) return <NotFound compact />
   const gallery = product.gallery?.length ? product.gallery : [product.image]
   const activeImage = gallerySelection.productId === String(product.id) ? gallerySelection.index : 0
@@ -71,8 +92,8 @@ export default function ProductDetail() {
             {product.features?.map((feature) => <li key={feature}><Check size={16} /> {feature}</li>)}
           </ul>
           <div className="product-info__actions">
-            <button className="button button--accent" onClick={() => addToCart(product)}>
-              <ShoppingBag size={18} /> Ajouter à ma sélection
+            <button className="button button--accent" onClick={() => addToCart(product)} disabled={product.inStock === false}>
+              <ShoppingBag size={18} /> {product.inStock === false ? 'Indisponible actuellement' : 'Ajouter à ma sélection'}
             </button>
             <a className="button button--outline" href={whatsappLink(settings.whatsapp, inquiry)} target="_blank" rel="noreferrer">
               <MessageCircle size={18} /> Vérifier la compatibilité

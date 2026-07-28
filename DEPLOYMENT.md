@@ -9,6 +9,7 @@ L'application est un service unique : Express sert l'interface compilée, l'API 
 3. Ajoutez un stockage persistant avec :
    - chemin dans le conteneur : `/app/storage`
    - nom conseillé : `milan-storage`
+   - conservez **une seule réplique** : les sessions et le fichier de contenu sont locaux à cette instance
 4. Ajoutez les variables suivantes dans Coolify :
 
 ```env
@@ -38,7 +39,7 @@ Générez `SESSION_SECRET` localement avec `openssl rand -hex 32` ou un généra
 
 Au premier démarrage, `server/data/content.seed.json` est copié vers `/app/storage/content.json`. Toutes les modifications de l'administration sont ensuite écrites atomiquement dans ce fichier. Les médias sont enregistrés dans `/app/storage/uploads`.
 
-Le volume `/app/storage` est indispensable : sans lui, le contenu et les médias seraient perdus lors d'un redéploiement. Sauvegardez ce volume depuis Coolify avant toute migration.
+Le volume `/app/storage` est indispensable : sans lui, le contenu et les médias seraient perdus lors d'un redéploiement. Sauvegardez ce volume depuis Coolify avant toute migration et programmez une sauvegarde régulière. L'application maintient aussi `content.backup.json` pour récupérer automatiquement la dernière version valide après une écriture corrompue.
 
 ## Déploiement avec Docker Compose
 
@@ -58,4 +59,4 @@ curl http://localhost:3008/health
 
 ## API d'administration
 
-L'administration utilise un cookie de session `HttpOnly`, `SameSite=Strict`. Les routes d'écriture exigent une connexion via `POST /api/admin/login`. Les images JPEG, PNG, WebP, GIF et les vidéos MP4/WebM sont acceptées par `POST /api/admin/upload` dans le champ multipart `media`, dans la limite configurée par `MAX_UPLOAD_MB`.
+L'administration utilise un cookie de session `HttpOnly`, `SameSite=Strict`. Les routes d'écriture exigent une connexion via `POST /api/admin/login`. Les images JPEG, PNG et WebP sont acceptées par `POST /api/admin/upload` dans le champ multipart `media`, dans la limite configurée par `MAX_UPLOAD_MB`. Elles sont décodées, limitées en dimensions puis réencodées en WebP avant stockage.

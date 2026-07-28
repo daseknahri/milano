@@ -17,11 +17,11 @@ services:
       SESSION_SECRET: ${SESSION_SECRET}
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-20}
     ports:
-      - "${APP_PORT:-3008}:3008"
+      - "127.0.0.1:${APP_PORT:-3008}:3008"
     volumes:
       - milan_storage:/app/storage
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3008/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:'+(process.env.PORT||3008)+'/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       start_period: 15s

@@ -36,6 +36,9 @@ test.after(async () => {
 test('health and seeded public content are available', async () => {
   const health = await fetch(`${baseUrl}/health`);
   assert.equal(health.status, 200);
+  assert.match(health.headers.get('content-security-policy'), /default-src 'self'/);
+  assert.equal(health.headers.get('x-content-type-options'), 'nosniff');
+  assert.equal(health.headers.get('cache-control'), 'no-store');
   const response = await fetch(`${baseUrl}/api/content`);
   const content = await response.json();
   assert.equal(response.status, 200);
@@ -51,6 +54,9 @@ test('health and seeded public content are available', async () => {
 
 test('admin is protected and valid credentials create a session', async () => {
   assert.equal((await fetch(`${baseUrl}/api/admin/content`)).status, 401);
+  const anonymousSession = await fetch(`${baseUrl}/api/admin/session`);
+  assert.equal(anonymousSession.status, 200);
+  assert.equal((await anonymousSession.json()).authenticated, false);
   const response = await fetch(`${baseUrl}/api/admin/login`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
@@ -63,6 +69,13 @@ test('admin is protected and valid credentials create a session', async () => {
 });
 
 test('admin can update settings and create then delete content', async () => {
+  const hostileResponse = await fetch(`${baseUrl}/api/admin/settings`, {
+    method: 'PUT',
+    headers: { cookie, origin: 'https://attacker.example', 'content-type': 'application/json' },
+    body: JSON.stringify({ announcement: 'Hostile update' }),
+  });
+  assert.equal(hostileResponse.status, 403);
+
   const settingsResponse = await fetch(`${baseUrl}/api/admin/settings`, {
     method: 'PUT',
     headers: { cookie, 'content-type': 'application/json' },
@@ -126,7 +139,16 @@ test('admin can update settings and create then delete content', async () => {
 });
 
 test('upload validates file content and returns a persisted URL', async () => {
-  const png = Buffer.from('89504e470d0a1a0a0000000d49484452', 'hex');
+  const invalidForm = new FormData();
+  invalidForm.append('media', new Blob([Buffer.from('89504e470d0a1a0a', 'hex')], { type: 'image/png' }), 'truncated.png');
+  const invalidResponse = await fetch(`${baseUrl}/api/admin/upload`, {
+    method: 'POST',
+    headers: { cookie },
+    body: invalidForm,
+  });
+  assert.equal(invalidResponse.status, 415);
+
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
   const form = new FormData();
   form.append('media', new Blob([png], { type: 'image/png' }), 'sample.png');
   const response = await fetch(`${baseUrl}/api/admin/upload`, {
@@ -136,6 +158,19 @@ test('upload validates file content and returns a persisted URL', async () => {
   });
   assert.equal(response.status, 201);
   const { url } = await response.json();
-  assert.match(url, /^\/uploads\/.+\.png$/);
-  assert.equal((await fetch(`${baseUrl}${url}`)).status, 200);
+  assert.match(url, /^\/uploads\/.+\.webp$/);
+  const uploaded = await fetch(`${baseUrl}${url}`);
+  assert.equal(uploaded.status, 200);
+  assert.equal(uploaded.headers.get('content-type'), 'image/webp');
+});
+
+test('content automatically recovers from the last valid backup', async () => {
+  await fs.writeFile(path.join(testStorage, 'content.json'), '{invalid json', 'utf8');
+  const response = await fetch(`${baseUrl}/api/content`);
+  assert.equal(response.status, 200);
+  const recovered = await response.json();
+  assert.ok(Array.isArray(recovered.categories));
+  assert.ok(Array.isArray(recovered.products));
+  const files = await fs.readdir(testStorage);
+  assert.ok(files.some((name) => name.includes('.corrupt')));
 });

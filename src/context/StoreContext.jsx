@@ -8,11 +8,11 @@ const asList = (value) => {
 }
 
 const normalizeContent = (data) => {
-  const categories = Array.isArray(data?.categories) && data.categories.length
+  const categories = Array.isArray(data?.categories)
     ? data.categories
     : fallbackContent.categories
   const categoryNames = new Map(categories.map((category) => [category.id, category.name]))
-  const products = Array.isArray(data?.products) && data.products.length
+  const products = Array.isArray(data?.products)
     ? data.products
     : fallbackContent.products
 
@@ -43,9 +43,15 @@ export function StoreProvider({ children }) {
   const [content, setContent] = useState(fallbackContent)
   const [loading, setLoading] = useState(true)
   const [usingFallback, setUsingFallback] = useState(false)
+  const [retryKey, setRetryKey] = useState(0)
   const [cart, setCart] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('milan-cart') || '[]')
+      const stored = JSON.parse(localStorage.getItem('milan-cart') || '[]')
+      if (!Array.isArray(stored)) return []
+      return stored
+        .filter((item) => item && (typeof item.id === 'string' || typeof item.id === 'number'))
+        .slice(0, 50)
+        .map((item) => ({ ...item, quantity: Math.min(99, Math.max(1, Number(item.quantity) || 1)) }))
     } catch {
       return []
     }
@@ -60,7 +66,10 @@ export function StoreProvider({ children }) {
         if (!response.ok) throw new Error('Contenu indisponible')
         return response.json()
       })
-      .then((data) => setContent(normalizeContent(data)))
+      .then((data) => {
+        setContent(normalizeContent(data))
+        setUsingFallback(false)
+      })
       .catch(() => setUsingFallback(true))
       .finally(() => {
         clearTimeout(timeout)
@@ -70,10 +79,14 @@ export function StoreProvider({ children }) {
       clearTimeout(timeout)
       controller.abort()
     }
-  }, [])
+  }, [retryKey])
 
   useEffect(() => {
-    localStorage.setItem('milan-cart', JSON.stringify(cart))
+    try {
+      localStorage.setItem('milan-cart', JSON.stringify(cart))
+    } catch {
+      // The cart remains usable in memory when storage is blocked or full.
+    }
   }, [cart])
 
   const hydratedCart = useMemo(() => {
@@ -88,11 +101,12 @@ export function StoreProvider({ children }) {
   }, [cart, content.products, loading])
 
   const addToCart = useCallback((product) => {
+    if (product.inStock === false) return
     setCart((current) => {
       const found = current.find((item) => item.id === product.id)
       return found
         ? current.map((item) =>
-            item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+            item.id === product.id ? { ...item, quantity: Math.min(99, item.quantity + 1) } : item,
           )
         : [...current, { ...product, quantity: 1 }]
     })
@@ -103,8 +117,14 @@ export function StoreProvider({ children }) {
     setCart((current) =>
       quantity <= 0
         ? current.filter((item) => item.id !== id)
-        : current.map((item) => (item.id === id ? { ...item, quantity } : item)),
+        : current.map((item) => (item.id === id ? { ...item, quantity: Math.min(99, quantity) } : item)),
     )
+  }, [])
+
+  const retryContent = useCallback(() => {
+    setLoading(true)
+    setUsingFallback(false)
+    setRetryKey((key) => key + 1)
   }, [])
 
   const value = useMemo(
@@ -112,6 +132,7 @@ export function StoreProvider({ children }) {
       ...content,
       loading,
       usingFallback,
+      retryContent,
       cart: hydratedCart,
       cartOpen,
       setCartOpen,
@@ -119,7 +140,7 @@ export function StoreProvider({ children }) {
       updateQuantity,
       cartCount: hydratedCart.reduce((sum, item) => sum + item.quantity, 0),
     }),
-    [content, loading, usingFallback, hydratedCart, cartOpen, addToCart, updateQuantity],
+    [content, loading, usingFallback, hydratedCart, cartOpen, addToCart, updateQuantity, retryContent],
   )
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

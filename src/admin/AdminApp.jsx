@@ -78,16 +78,31 @@ const EMPTY_PRODUCT = {
 }
 
 async function request(path, options = {}) {
-  const response = await fetch(path, {
-    credentials: 'include',
-    ...options,
-    headers: options.body instanceof FormData
-      ? options.headers
-      : { 'Content-Type': 'application/json', ...options.headers },
-  })
+  const controller = new AbortController()
+  const timeoutMs = options.body instanceof FormData ? 60_000 : options.method && options.method !== 'GET' ? 30_000 : 15_000
+  const timeout = window.setTimeout(() => controller.abort(), timeoutMs)
+  let response
+  try {
+    response = await fetch(path, {
+      credentials: 'include',
+      ...options,
+      signal: controller.signal,
+      headers: options.body instanceof FormData
+        ? options.headers
+        : { 'Content-Type': 'application/json', ...options.headers },
+    })
+  } catch (error) {
+    if (error.name === 'AbortError') throw new Error('The request timed out. Check your connection and try again.')
+    throw new Error('The server could not be reached. Check your connection and try again.')
+  } finally {
+    window.clearTimeout(timeout)
+  }
 
   const payload = await response.json().catch(() => ({}))
   if (!response.ok) {
+    if (response.status === 401 && path !== '/api/admin/session' && path !== '/api/admin/login') {
+      window.dispatchEvent(new Event('admin:unauthorized'))
+    }
     throw new Error(payload.error || payload.message || 'Something went wrong. Please try again.')
   }
   return payload
@@ -300,6 +315,36 @@ function UploadField({ label, value, onChange, onStatus, wide = false }) {
 }
 
 function Sidebar({ activeView, setActiveView, mobileOpen, setMobileOpen, onLogout, brandName }) {
+  const sidebarRef = useRef(null)
+
+  useEffect(() => {
+    if (!mobileOpen) return undefined
+    const previouslyFocused = document.activeElement
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setMobileOpen(false)
+      if (event.key !== 'Tab') return
+      const focusable = [...(sidebarRef.current?.querySelectorAll('button:not([disabled]), [href]') || [])]
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
+    document.body.classList.add('admin-nav-open')
+    document.addEventListener('keydown', handleKeyDown)
+    sidebarRef.current?.querySelector('button')?.focus()
+    return () => {
+      document.body.classList.remove('admin-nav-open')
+      document.removeEventListener('keydown', handleKeyDown)
+      previouslyFocused?.focus?.()
+    }
+  }, [mobileOpen, setMobileOpen])
+
   return (
     <>
       <button
@@ -307,7 +352,13 @@ function Sidebar({ activeView, setActiveView, mobileOpen, setMobileOpen, onLogou
         onClick={() => setMobileOpen(false)}
         aria-label="Close navigation"
       />
-      <aside className={`admin-sidebar ${mobileOpen ? 'is-open' : ''}`}>
+      <aside
+        ref={sidebarRef}
+        className={`admin-sidebar ${mobileOpen ? 'is-open' : ''}`}
+        aria-label="Admin navigation panel"
+        aria-modal={mobileOpen ? 'true' : undefined}
+        role={mobileOpen ? 'dialog' : undefined}
+      >
         <div className="sidebar-brand">
           <div className="sidebar-logo"><CarFront size={21} /></div>
           <div>
@@ -327,6 +378,7 @@ function Sidebar({ activeView, setActiveView, mobileOpen, setMobileOpen, onLogou
               <button
                 key={item.id}
                 className={activeView === item.id ? 'active' : ''}
+                aria-current={activeView === item.id ? 'page' : undefined}
                 onClick={() => {
                   setActiveView(item.id)
                   setMobileOpen(false)
@@ -642,7 +694,7 @@ function CategoryEditor({ category, onClose, onSave, notify }) {
   }
 
   return (
-    <EditorDrawer title={category.id ? 'Edit category' : 'New category'} onClose={onClose}>
+    <EditorDrawer title={category.id ? 'Edit category' : 'New category'} onClose={onClose} busy={saving}>
       <form className="drawer-form" onSubmit={submit} noValidate aria-busy={saving}>
         <div className="drawer-form-body">
           <Field label="Category name" required><input autoFocus value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
@@ -650,7 +702,7 @@ function CategoryEditor({ category, onClose, onSave, notify }) {
           <UploadField label="Category image" value={form.image} onChange={(value) => setForm({ ...form, image: value })} onStatus={notify} />
         </div>
         <div className="drawer-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
+          <button className="secondary-button" type="button" onClick={onClose} disabled={saving}>Cancel</button>
           <button className="primary-button" type="submit" disabled={saving}><Save size={16} />{saving ? 'Saving…' : 'Save category'}</button>
         </div>
       </form>
@@ -847,7 +899,7 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
   }
 
   return (
-    <EditorDrawer title={product.id ? 'Edit product' : 'Add product'} wide onClose={onClose}>
+    <EditorDrawer title={product.id ? 'Edit product' : 'Add product'} wide onClose={onClose} busy={saving || galleryUploading}>
       <form className="drawer-form product-form" onSubmit={submit} noValidate aria-busy={saving}>
         <div className="drawer-form-body form-grid">
           <Field label="Product name" required wide><input autoFocus value={form.name} onChange={(e) => handleNameChange(e.target.value)} required /></Field>
@@ -894,7 +946,7 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
           </div>
         </div>
         <div className="drawer-actions">
-          <button className="secondary-button" type="button" onClick={onClose}>Cancel</button>
+          <button className="secondary-button" type="button" onClick={onClose} disabled={saving || galleryUploading}>Cancel</button>
           <button className="primary-button" type="submit" disabled={saving}><Save size={16} />{saving ? 'Saving…' : 'Save product'}</button>
         </div>
       </form>
@@ -913,13 +965,13 @@ function Toggle({ checked, onChange, label, description }) {
   )
 }
 
-function EditorDrawer({ title, children, onClose, wide = false }) {
+function EditorDrawer({ title, children, onClose, wide = false, busy = false }) {
   const dialogRef = useRef(null)
 
   useEffect(() => {
     const previouslyFocused = document.activeElement
     const handleDialogKeys = (event) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape' && !busy) onClose()
       if (event.key !== 'Tab') return
       const focusable = [...(dialogRef.current?.querySelectorAll(
         'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
@@ -942,13 +994,13 @@ function EditorDrawer({ title, children, onClose, wide = false }) {
       document.body.classList.remove('drawer-open')
       previouslyFocused?.focus?.()
     }
-  }, [onClose])
+  }, [onClose, busy])
 
   return createPortal(
     <div ref={dialogRef} className="dialog-layer" role="dialog" aria-modal="true" aria-label={title}>
-      <button className="dialog-scrim" aria-label="Close editor" onClick={onClose} />
+      <button className="dialog-scrim" aria-label="Close editor" onClick={onClose} disabled={busy} />
       <aside className={`editor-drawer ${wide ? 'wide' : ''}`}>
-        <header><div><p className="eyebrow">Catalogue editor</p><h2>{title}</h2></div><button onClick={onClose} aria-label="Close"><X size={20} /></button></header>
+        <header><div><p className="eyebrow">Catalogue editor</p><h2>{title}</h2></div><button onClick={onClose} aria-label="Close" disabled={busy}><X size={20} /></button></header>
         <div className="drawer-content">{children}</div>
       </aside>
     </div>,
@@ -1016,6 +1068,23 @@ export default function AdminApp() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [toast, setToast] = useState(null)
 
+  useEffect(() => {
+    let robots = document.head.querySelector('meta[name="robots"]')
+    const created = !robots
+    if (!robots) {
+      robots = document.createElement('meta')
+      robots.setAttribute('name', 'robots')
+      document.head.appendChild(robots)
+    }
+    const previous = robots.getAttribute('content') || 'index, follow'
+    robots.setAttribute('content', 'noindex, nofollow')
+    document.title = 'Administration — Milan Automobile Accessoires'
+    return () => {
+      if (created) robots.remove()
+      else robots.setAttribute('content', previous)
+    }
+  }, [])
+
   const loadContent = useCallback(async () => {
     setLoadingContent(true)
     setContentError('')
@@ -1045,6 +1114,15 @@ export default function AdminApp() {
   useEffect(() => {
     if (session === 'authenticated') loadContent()
   }, [session, loadContent])
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setSession('anonymous')
+      setContent({ settings: EMPTY_SETTINGS, categories: [], products: [] })
+    }
+    window.addEventListener('admin:unauthorized', handleUnauthorized)
+    return () => window.removeEventListener('admin:unauthorized', handleUnauthorized)
+  }, [])
 
   useEffect(() => {
     if (!toast) return undefined
@@ -1112,7 +1190,7 @@ export default function AdminApp() {
         )}
       </main>
       {toast && (
-        <div className={`toast ${toast.type}`} role="status" key={toast.id}>
+        <div className={`toast ${toast.type}`} role={toast.type === 'error' ? 'alert' : 'status'} aria-live={toast.type === 'error' ? 'assertive' : 'polite'} key={toast.id}>
           {toast.type === 'success' ? <Check size={17} /> : <CircleAlert size={17} />}
           <span>{toast.message}</span>
           <button onClick={() => setToast(null)} aria-label="Dismiss"><X size={15} /></button>

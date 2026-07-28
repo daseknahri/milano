@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useSeo } from '../hooks/useSeo'
 
 export default function NotFound({ compact = false }) {
-  useSeo('Page introuvable', 'Cette page est introuvable.')
+  useSeo('Page introuvable', 'Cette page est introuvable.', { noindex: true })
   return (
     <main className={`not-found ${compact ? 'not-found--compact' : ''}`}>
       <span>404</span>

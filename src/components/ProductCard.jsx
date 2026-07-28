@@ -21,7 +21,12 @@ export default function ProductCard({ product, priority = false }) {
             {Number(product.compareAtPrice) > 0 && <del>{formatPrice(product.compareAtPrice)}</del>}
           </div>
         </div>
-        <button className="quick-add" onClick={() => addToCart(product)} aria-label={`Ajouter ${product.name} au panier`}>
+        <button
+          className="quick-add"
+          onClick={() => addToCart(product)}
+          aria-label={product.inStock === false ? `${product.name} est indisponible` : `Ajouter ${product.name} au panier`}
+          disabled={product.inStock === false}
+        >
           <Plus size={20} />
         </button>
       </div>

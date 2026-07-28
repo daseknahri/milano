@@ -327,6 +327,7 @@ button:disabled { cursor: wait; opacity: .65; transform: none !important; }
 .load-error h1 { margin: 4px 0 0; color: var(--admin-text); font-family: 'Manrope', sans-serif; font-size: 23px; }
 .load-error p { max-width: 430px; margin: 0 0 8px; }
 .sidebar-scrim { display: none; }
+body.admin-nav-open { overflow: hidden; }
 
 @media (max-width: 1050px) {
   .admin-page { padding-inline: 34px; }

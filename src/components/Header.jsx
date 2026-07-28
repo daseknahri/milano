@@ -22,7 +22,7 @@ export default function Header() {
     <>
       <div className="announcement">{settings.announcement}</div>
       <header className="site-header">
-        <Link to="/" className="brand-link"><Logo /></Link>
+        <Link to="/" className="brand-link" aria-label="Milan Automobile Accessoires — accueil"><Logo /></Link>
         <nav className="desktop-nav" aria-label="Navigation principale">
           {links.map(([to, label]) => (
             <NavLink key={to} to={to} end={to === '/'}>{label}</NavLink>
