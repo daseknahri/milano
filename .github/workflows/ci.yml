@@ -36,3 +36,6 @@ jobs:
 
       - name: Build production bundle
         run: npm run build
+
+      - name: Build Coolify container
+        run: docker build --tag milan-auto:ci .
