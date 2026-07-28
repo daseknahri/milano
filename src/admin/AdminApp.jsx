@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect -- Form state intentionally follows refreshed API data. */
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   ArrowLeft,
   BadgeCheck,
@@ -123,6 +124,18 @@ function slugify(value) {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+function validateAdminForm(formElement, notify) {
+  if (formElement.checkValidity()) return true
+  const invalidField = formElement.querySelector(':invalid')
+  invalidField?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  window.setTimeout(() => {
+    invalidField?.focus({ preventScroll: true })
+    invalidField?.reportValidity()
+  }, 220)
+  notify?.('error', 'Complete the highlighted required fields before saving.')
+  return false
 }
 
 function listToText(value, separator = '\n') {
@@ -457,6 +470,7 @@ function SettingsView({ settings, onSaved, notify }) {
 
   async function handleSubmit(event) {
     event.preventDefault()
+    if (!validateAdminForm(event.currentTarget, notify)) return
     setSaving(true)
     try {
       const result = await request('/api/admin/settings', {
@@ -473,7 +487,7 @@ function SettingsView({ settings, onSaved, notify }) {
   }
 
   return (
-    <form className="view-enter settings-form" onSubmit={handleSubmit}>
+    <form className="view-enter settings-form" onSubmit={handleSubmit} noValidate aria-busy={saving}>
       <PageHeader
         title="Store settings"
         description="Manage the identity, story, and contact information shown across the storefront."
@@ -617,6 +631,7 @@ function CategoryEditor({ category, onClose, onSave, notify }) {
 
   async function submit(event) {
     event.preventDefault()
+    if (!validateAdminForm(event.currentTarget, notify)) return
     setSaving(true)
     try {
       await onSave({ name: form.name.trim(), description: form.description.trim(), image: form.image })
@@ -628,7 +643,7 @@ function CategoryEditor({ category, onClose, onSave, notify }) {
 
   return (
     <EditorDrawer title={category.id ? 'Edit category' : 'New category'} onClose={onClose}>
-      <form className="drawer-form" onSubmit={submit}>
+      <form className="drawer-form" onSubmit={submit} noValidate aria-busy={saving}>
         <div className="drawer-form-body">
           <Field label="Category name" required><input autoFocus value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
           <Field label="Description"><textarea rows="5" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
@@ -814,6 +829,7 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
 
   async function submit(event) {
     event.preventDefault()
+    if (!validateAdminForm(event.currentTarget, notify)) return
     setSaving(true)
     try {
       await onSave({
@@ -832,7 +848,7 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
 
   return (
     <EditorDrawer title={product.id ? 'Edit product' : 'Add product'} wide onClose={onClose}>
-      <form className="drawer-form product-form" onSubmit={submit}>
+      <form className="drawer-form product-form" onSubmit={submit} noValidate aria-busy={saving}>
         <div className="drawer-form-body form-grid">
           <Field label="Product name" required wide><input autoFocus value={form.name} onChange={(e) => handleNameChange(e.target.value)} required /></Field>
           <Field label="URL slug" required><input value={form.slug} onChange={(e) => change('slug', slugify(e.target.value))} required /></Field>
@@ -898,38 +914,72 @@ function Toggle({ checked, onChange, label, description }) {
 }
 
 function EditorDrawer({ title, children, onClose, wide = false }) {
+  const dialogRef = useRef(null)
+
   useEffect(() => {
-    const closeOnEscape = (event) => {
+    const previouslyFocused = document.activeElement
+    const handleDialogKeys = (event) => {
       if (event.key === 'Escape') onClose()
+      if (event.key !== 'Tab') return
+      const focusable = [...(dialogRef.current?.querySelectorAll(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      ) || [])].filter((element) => element.getClientRects().length)
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
-    document.addEventListener('keydown', closeOnEscape)
+    document.addEventListener('keydown', handleDialogKeys)
     document.body.classList.add('drawer-open')
     return () => {
-      document.removeEventListener('keydown', closeOnEscape)
+      document.removeEventListener('keydown', handleDialogKeys)
       document.body.classList.remove('drawer-open')
+      previouslyFocused?.focus?.()
     }
   }, [onClose])
 
-  return (
-    <div className="dialog-layer" role="dialog" aria-modal="true" aria-label={title}>
+  return createPortal(
+    <div ref={dialogRef} className="dialog-layer" role="dialog" aria-modal="true" aria-label={title}>
       <button className="dialog-scrim" aria-label="Close editor" onClick={onClose} />
       <aside className={`editor-drawer ${wide ? 'wide' : ''}`}>
         <header><div><p className="eyebrow">Catalogue editor</p><h2>{title}</h2></div><button onClick={onClose} aria-label="Close"><X size={20} /></button></header>
         <div className="drawer-content">{children}</div>
       </aside>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
 function ConfirmDialog({ title, description, onCancel, onConfirm }) {
   const [working, setWorking] = useState(false)
+  const cancelButtonRef = useRef(null)
+
+  useEffect(() => {
+    const previouslyFocused = document.activeElement
+    cancelButtonRef.current?.focus()
+    const handleEscape = (event) => {
+      if (event.key === 'Escape' && !working) onCancel()
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('keydown', handleEscape)
+      previouslyFocused?.focus?.()
+    }
+  }, [onCancel, working])
+
   async function confirm() {
     setWorking(true)
     await onConfirm()
     setWorking(false)
   }
 
-  return (
+  return createPortal(
     <div className="dialog-layer confirm-layer" role="alertdialog" aria-modal="true" aria-label={title}>
       <button className="dialog-scrim" aria-label="Cancel" onClick={onCancel} />
       <div className="confirm-dialog">
@@ -937,11 +987,12 @@ function ConfirmDialog({ title, description, onCancel, onConfirm }) {
         <h2>{title}</h2>
         <p>{description}</p>
         <div>
-          <button className="secondary-button" onClick={onCancel}>Cancel</button>
+          <button ref={cancelButtonRef} className="secondary-button" onClick={onCancel}>Cancel</button>
           <button className="danger-button" onClick={confirm} disabled={working}>{working ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={16} />}{working ? 'Deleting…' : 'Delete'}</button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
