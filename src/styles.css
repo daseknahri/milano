@@ -45,10 +45,7 @@ button { color: inherit; }
 }
 .brand-link { justify-self: start; }
 .logo { display: inline-flex; align-items: center; gap: .68rem; line-height: 1; }
-.logo__mark { width: 31px; height: 24px; position: relative; display: inline-block; }
-.logo__mark i { position: absolute; height: 3px; background: var(--accent); transform: skewX(-34deg); }
-.logo__mark i:first-child { width: 28px; top: 5px; left: 0; }
-.logo__mark i:last-child { width: 20px; bottom: 5px; right: 0; }
+.logo__mark { width: 34px; height: 34px; object-fit: cover; border-radius: 2px; flex: 0 0 auto; }
 .logo strong { display: block; font-family: var(--display); font-size: 1.1rem; letter-spacing: .22em; }
 .logo small { display: block; margin-top: .28rem; font-size: .42rem; font-weight: 600; letter-spacing: .16em; }
 .logo--light { color: white; }
@@ -323,7 +320,7 @@ button { color: inherit; }
 @media (max-width: 650px) {
   :root { --gutter: 1.2rem; }
   .announcement { font-size: .56rem; }
-  .logo__mark { width: 28px; }
+  .logo__mark { width: 30px; height: 30px; }
   .logo strong { font-size: .93rem; }
   .logo small { font-size: .36rem; }
   .hero__content { width: calc(100% - 2.4rem); }

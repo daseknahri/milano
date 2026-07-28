@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, react-hooks/set-state-in-effect -- The project ESLint config does not include JSX usage detection; React components are referenced through JSX below. */
+/* eslint-disable react-hooks/set-state-in-effect -- Form state intentionally follows refreshed API data. */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft,
@@ -65,6 +65,7 @@ const EMPTY_PRODUCT = {
   vehicleModels: '',
   years: '',
   price: '',
+  priceLabel: '',
   compareAtPrice: '',
   image: '',
   gallery: [],
@@ -108,6 +109,10 @@ function formatPrice(value) {
     currency: 'MAD',
     maximumFractionDigits: 0,
   }).format(number)
+}
+
+function formatProductPrice(product) {
+  return product.priceLabel || (Number(product.price) > 0 ? formatPrice(product.price) : 'Sur devis')
 }
 
 function slugify(value) {
@@ -394,7 +399,7 @@ function Dashboard({ content, setActiveView }) {
                   <span className={`stock-state ${product.inStock === false ? 'out' : ''}`}>
                     {product.inStock === false ? 'Out of stock' : 'In stock'}
                   </span>
-                  <b>{formatPrice(product.price)}</b>
+                  <b>{formatProductPrice(product)}</b>
                 </div>
               ))}
             </div>
@@ -597,7 +602,7 @@ function CategoriesView({ categories, setCategories, notify }) {
       {deleting && (
         <ConfirmDialog
           title="Delete this category?"
-          description={`“${deleting.name}” will be removed. Products are not deleted, but may need a new category.`}
+          description={`“${deleting.name}” can only be removed after its products have been reassigned to another category.`}
           onCancel={() => setDeleting(null)}
           onConfirm={deleteCategory}
         />
@@ -641,6 +646,11 @@ function ProductsView({ products, setProducts, categories, notify }) {
   const [deleting, setDeleting] = useState(null)
   const [query, setQuery] = useState('')
   const [filter, setFilter] = useState('all')
+
+  const categoryNames = useMemo(
+    () => new Map(categories.map((category) => [category.id, category.name])),
+    [categories],
+  )
 
   const filtered = useMemo(() => products.filter((product) => {
     const matchesQuery = `${product.name} ${product.brand} ${product.category}`.toLowerCase().includes(query.toLowerCase())
@@ -709,8 +719,8 @@ function ProductsView({ products, setProducts, categories, notify }) {
                       <div><strong>{product.name}</strong><span>{product.brand || 'No brand'} · {product.slug}</span></div>
                     </div>
                   </td>
-                  <td>{product.category || 'Uncategorized'}</td>
-                  <td><strong>{formatPrice(product.price)}</strong>{product.compareAtPrice && <del>{formatPrice(product.compareAtPrice)}</del>}</td>
+                  <td>{categoryNames.get(product.categoryId || product.category) || product.category || 'Uncategorized'}</td>
+                  <td><strong>{formatProductPrice(product)}</strong>{Number(product.compareAtPrice) > 0 && <del>{formatPrice(product.compareAtPrice)}</del>}</td>
                   <td><span className={`stock-state ${product.inStock === false ? 'out' : ''}`}>{product.inStock === false ? 'Out of stock' : 'In stock'}</span></td>
                   <td>
                     <div className="row-actions">
@@ -754,6 +764,7 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
   const [form, setForm] = useState({
     ...EMPTY_PRODUCT,
     ...product,
+    category: product.categoryId || product.category || '',
     vehicleModels: listToText(product.vehicleModels, ', '),
     features: listToText(product.features),
     gallery: Array.isArray(product.gallery) ? product.gallery : [],
@@ -827,11 +838,12 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
           <Field label="Category" required>
             <select value={form.category} onChange={(e) => change('category', e.target.value)} required>
               <option value="">Select category</option>
-              {categories.map((category) => <option key={category.id} value={category.name}>{category.name}</option>)}
+              {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
             </select>
           </Field>
           <Field label="Badge"><input value={form.badge} onChange={(e) => change('badge', e.target.value)} placeholder="New, Bestseller…" /></Field>
           <Field label="Price (MAD)" required><input type="number" min="0" step="0.01" value={form.price} onChange={(e) => change('price', e.target.value)} required /></Field>
+          <Field label="Price label" hint="Optional text such as “Sur devis”."><input value={form.priceLabel} onChange={(e) => change('priceLabel', e.target.value)} /></Field>
           <Field label="Compare-at price (MAD)"><input type="number" min="0" step="0.01" value={form.compareAtPrice} onChange={(e) => change('compareAtPrice', e.target.value)} /></Field>
           <Field label="Compatible vehicles" hint="Separate models with commas."><input value={form.vehicleModels} onChange={(e) => change('vehicleModels', e.target.value)} placeholder="Dacia Duster, Renault Clio…" /></Field>
           <Field label="Compatible years"><input value={form.years} onChange={(e) => change('years', e.target.value)} placeholder="2018–2025" /></Field>

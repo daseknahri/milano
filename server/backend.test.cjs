@@ -105,12 +105,24 @@ test('admin can update settings and create then delete content', async () => {
   assert.equal(product.inStock, false);
   assert.equal(product.available, false);
 
+  const protectedDeleteResponse = await fetch(`${baseUrl}/api/admin/categories/${category.id}`, {
+    method: 'DELETE',
+    headers: { cookie },
+  });
+  assert.equal(protectedDeleteResponse.status, 409);
+
+  const deleteProductResponse = await fetch(`${baseUrl}/api/admin/products/${product.id}`, {
+    method: 'DELETE',
+    headers: { cookie },
+  });
+  assert.equal(deleteProductResponse.status, 200);
+
   const deleteResponse = await fetch(`${baseUrl}/api/admin/categories/${category.id}`, {
     method: 'DELETE',
     headers: { cookie },
   });
   assert.equal(deleteResponse.status, 200);
-  assert.equal((await deleteResponse.json()).deletedProducts, 1);
+  assert.equal((await deleteResponse.json()).deleted, true);
 });
 
 test('upload validates file content and returns a persisted URL', async () => {

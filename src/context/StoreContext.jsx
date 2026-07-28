@@ -2,15 +2,42 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { fallbackContent } from '../data/fallback'
 import { StoreContext } from './store'
 
-const normalizeContent = (data) => ({
-  settings: { ...fallbackContent.settings, ...(data?.settings || {}) },
-  categories: Array.isArray(data?.categories) && data.categories.length
+const asList = (value) => {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  return value ? [value] : []
+}
+
+const normalizeContent = (data) => {
+  const categories = Array.isArray(data?.categories) && data.categories.length
     ? data.categories
-    : fallbackContent.categories,
-  products: Array.isArray(data?.products) && data.products.length
+    : fallbackContent.categories
+  const categoryNames = new Map(categories.map((category) => [category.id, category.name]))
+  const products = Array.isArray(data?.products) && data.products.length
     ? data.products
-    : fallbackContent.products,
-})
+    : fallbackContent.products
+
+  return {
+    settings: { ...fallbackContent.settings, ...(data?.settings || {}) },
+    categories,
+    products: products.map((product) => {
+      const image = product.image || product.images?.[0] || ''
+      const gallery = [...new Set([
+        image,
+        ...(asList(product.gallery).length ? asList(product.gallery) : asList(product.images)),
+      ].filter(Boolean))]
+      return {
+        ...product,
+        categoryId: product.categoryId || product.category,
+        category: categoryNames.get(product.categoryId || product.category) || product.category || 'Collection Milan',
+        vehicleModels: asList(product.vehicleModels),
+        years: asList(product.years),
+        features: asList(product.features),
+        image,
+        gallery,
+      }
+    }),
+  }
+}
 
 export function StoreProvider({ children }) {
   const [content, setContent] = useState(fallbackContent)

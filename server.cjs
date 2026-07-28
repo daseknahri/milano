@@ -145,7 +145,6 @@ async function createApp() {
   }));
 
   app.delete('/api/admin/categories/:id', asyncRoute(async (req, res) => {
-    let deletedProducts = 0;
     await updateContent((current) => {
       const index = findIndex(current.categories, req.params.id);
       if (index < 0) {
@@ -153,13 +152,15 @@ async function createApp() {
         error.status = 404;
         throw error;
       }
+      if (current.products.some(({ categoryId }) => categoryId === req.params.id)) {
+        const error = new Error('Réassignez les produits de cette catégorie avant de la supprimer.');
+        error.status = 409;
+        throw error;
+      }
       current.categories.splice(index, 1);
-      const before = current.products.length;
-      current.products = current.products.filter(({ categoryId }) => categoryId !== req.params.id);
-      deletedProducts = before - current.products.length;
       return current;
     });
-    res.json({ deleted: true, deletedProducts });
+    res.json({ deleted: true });
   }));
 
   app.post('/api/admin/products', asyncRoute(async (req, res) => {

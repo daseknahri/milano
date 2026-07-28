@@ -2,15 +2,16 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, Minus, Plus, ShoppingBag, Trash2, X } from 'lucide-react'
 import { useEffect } from 'react'
 import { useStore } from '../context/store'
-import { formatPrice, imageFallback, whatsappLink } from '../utils'
+import { formatPrice, imageFallback, productPriceLabel, whatsappLink } from '../utils'
 
 export default function CartDrawer() {
   const { cart, cartOpen, setCartOpen, updateQuantity, settings } = useStore()
   const total = cart.reduce((sum, item) => sum + Number(item.price || 0) * item.quantity, 0)
+  const hasQuoteItems = cart.some((item) => !Number(item.price))
   const orderText = [
     'Bonjour Milan Automobile Accessoires, je souhaite commander :',
-    ...cart.map((item) => `• ${item.name} × ${item.quantity} — ${formatPrice(item.price * item.quantity)}`),
-    `Total indicatif : ${formatPrice(total)}`,
+    ...cart.map((item) => `• ${item.name} × ${item.quantity} — ${Number(item.price) ? formatPrice(item.price * item.quantity) : productPriceLabel(item)}`),
+    hasQuoteItems ? `Sous-total des articles tarifés : ${formatPrice(total)}` : `Total indicatif : ${formatPrice(total)}`,
     'Pouvez-vous me confirmer la disponibilité et l’installation ?',
   ].join('\n')
 
@@ -54,7 +55,7 @@ export default function CartDrawer() {
                       <img src={item.image} alt="" onError={imageFallback} />
                       <div>
                         <h3>{item.name}</h3>
-                        <span>{formatPrice(item.price)}</span>
+                        <span>{productPriceLabel(item)}</span>
                         <div className="quantity">
                           <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Réduire"><Minus size={14} /></button>
                           <span>{item.quantity}</span>
@@ -66,7 +67,7 @@ export default function CartDrawer() {
                   ))}
                 </div>
                 <div className="cart-checkout">
-                  <div><span>Total indicatif</span><strong>{formatPrice(total)}</strong></div>
+                  <div><span>{hasQuoteItems ? 'Devis personnalisé' : 'Total indicatif'}</span><strong>{hasQuoteItems ? 'À confirmer' : formatPrice(total)}</strong></div>
                   <p>Disponibilité et compatibilité confirmées par notre équipe avant paiement.</p>
                   <a className="button button--accent" href={whatsappLink(settings.whatsapp, orderText)} target="_blank" rel="noreferrer">
                     Commander sur WhatsApp <ArrowUpRight size={18} />

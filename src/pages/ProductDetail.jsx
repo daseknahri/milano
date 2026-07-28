@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import { useStore } from '../context/store'
 import { useSeo } from '../hooks/useSeo'
-import { formatPrice, imageFallback, whatsappLink } from '../utils'
+import { formatPrice, imageFallback, productPriceLabel, whatsappLink } from '../utils'
 import NotFound from './NotFound'
 
 export default function ProductDetail() {
@@ -42,8 +42,8 @@ export default function ProductDetail() {
           <span className="eyebrow">{product.category} · {product.brand}</span>
           <h1>{product.name}</h1>
           <div className="product-info__price">
-            <strong>{formatPrice(product.price)}</strong>
-            {product.compareAtPrice && <del>{formatPrice(product.compareAtPrice)}</del>}
+            <strong>{productPriceLabel(product)}</strong>
+            {Number(product.compareAtPrice) > 0 && <del>{formatPrice(product.compareAtPrice)}</del>}
           </div>
           <p className="product-info__description">{product.description}</p>
           <div className="compatibility">

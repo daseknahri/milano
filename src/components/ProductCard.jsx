@@ -1,7 +1,7 @@
 import { ArrowUpRight, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../context/store'
-import { formatPrice, imageFallback } from '../utils'
+import { formatPrice, imageFallback, productPriceLabel } from '../utils'
 
 export default function ProductCard({ product, priority = false }) {
   const { addToCart } = useStore()
@@ -17,8 +17,8 @@ export default function ProductCard({ product, priority = false }) {
           <p>{product.category} · {product.brand}</p>
           <Link to={`/produit/${product.slug}`}><h3>{product.name}</h3></Link>
           <div className="product-price">
-            <strong>{formatPrice(product.price)}</strong>
-            {product.compareAtPrice && <del>{formatPrice(product.compareAtPrice)}</del>}
+            <strong>{productPriceLabel(product)}</strong>
+            {Number(product.compareAtPrice) > 0 && <del>{formatPrice(product.compareAtPrice)}</del>}
           </div>
         </div>
         <button className="quick-add" onClick={() => addToCart(product)} aria-label={`Ajouter ${product.name} au panier`}>
