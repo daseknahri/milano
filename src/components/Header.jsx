@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Menu, Search, ShoppingBag, X } from 'lucide-react'
+import { Heart, Menu, Search, ShoppingBag, UserRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, NavLink } from 'react-router-dom'
@@ -9,9 +9,9 @@ import Logo from './Logo'
 
 const links = [
   ['/', 'Accueil'],
-  ['/catalogue', 'Catalogue'],
-  ['/atelier', 'Notre atelier'],
-  ['/contact', 'Contact'],
+  ['/catalogue', 'Boutique'],
+  ['/atelier', 'A propos'],
+  ['/contact', 'Contactez-nous'],
 ]
 
 export default function Header() {
@@ -21,8 +21,17 @@ export default function Header() {
   return (
     <>
       <div className="announcement">{settings.announcement}</div>
+      <div className="top-service-bar">
+        <span>Besoin d aide ? Appelez-nous : {settings.phone}</span>
+        <nav aria-label="Liens rapides">
+          <Link to="/atelier">A propos</Link>
+          <Link to="/admin">Mon compte</Link>
+          <Link to="/catalogue">Liste des souhaits</Link>
+          <Link to="/contact">Order Tracking</Link>
+        </nav>
+      </div>
       <header className="site-header">
-        <Link to="/" className="brand-link" aria-label="Milan Automobile Accessoires — accueil"><Logo /></Link>
+        <Link to="/" className="brand-link" aria-label="Milan Automobile Accessoires - accueil"><Logo /></Link>
         <nav className="desktop-nav" aria-label="Navigation principale">
           {links.map(([to, label]) => (
             <NavLink key={to} to={to} end={to === '/'}>{label}</NavLink>
@@ -31,6 +40,12 @@ export default function Header() {
         <div className="header-actions">
           <Link className="icon-button search-button" to="/catalogue" aria-label="Rechercher">
             <Search size={19} />
+          </Link>
+          <Link className="icon-button account-button" to="/admin" aria-label="Mon compte">
+            <UserRound size={19} />
+          </Link>
+          <Link className="icon-button wishlist-button" to="/catalogue" aria-label="Liste des souhaits">
+            <Heart size={19} />
           </Link>
           <button className="icon-button cart-button" onClick={() => setCartOpen(true)} aria-label={`Panier, ${cartCount} articles`}>
             <ShoppingBag size={19} />
