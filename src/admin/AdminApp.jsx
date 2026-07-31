@@ -696,7 +696,7 @@ function CategoriesView({ categories, setCategories, notify }) {
                 {category.image ? <img src={category.image} alt="" /> : <Boxes size={23} />}
               </div>
               <div className="category-copy">
-                <h2>{category.name}</h2>
+                <div className="category-heading"><h2>{category.name}</h2><span className={`visibility-state ${category.active === false ? 'hidden' : ''}`}>{category.active === false ? 'Hidden' : 'Published'}</span></div>
                 <p>{category.description || 'No description has been added.'}</p>
               </div>
               <div className="row-actions">
@@ -739,7 +739,7 @@ function CategoryEditor({ category, onClose, onSave, notify }) {
     if (!validateAdminForm(event.currentTarget, notify)) return
     setSaving(true)
     try {
-      await onSave({ name: form.name.trim(), description: form.description.trim(), image: form.image })
+      await onSave({ name: form.name.trim(), description: form.description.trim(), image: form.image, active: form.active !== false })
     } catch (saveError) {
       notify('error', saveError.message)
       setSaving(false)
@@ -851,7 +851,7 @@ function ProductsView({ products, setProducts, categories, notify }) {
                   </td>
                   <td>{categoryNames.get(product.categoryId || product.category) || product.category || 'Uncategorized'}</td>
                   <td><strong>{formatProductPrice(product)}</strong>{Number(product.compareAtPrice) > 0 && <del>{formatPrice(product.compareAtPrice)}</del>}</td>
-                  <td><span className={`stock-state ${product.inStock === false ? 'out' : ''}`}>{product.inStock === false ? 'Out of stock' : 'In stock'}</span></td>
+                  <td><div className="status-stack"><span className={`stock-state ${product.inStock === false ? 'out' : ''}`}>{product.inStock === false ? 'Out of stock' : 'In stock'}</span><span className={`visibility-state ${product.active === false ? 'hidden' : ''}`}>{product.active === false ? 'Hidden' : 'Published'}</span></div></td>
                   <td>
                     <div className="row-actions">
                       <button type="button" onClick={() => setEditing(product)} aria-label={`Edit ${product.name}`}><Pencil size={16} /></button>

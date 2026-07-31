@@ -221,7 +221,13 @@ button:disabled { cursor: wait; opacity: .65; transform: none !important; }
 .category-list { border-top: 1px solid var(--admin-line); }
 .category-row { display: grid; grid-template-columns: 94px minmax(0, 1fr) auto; align-items: center; gap: 25px; min-height: 124px; border-bottom: 1px solid var(--admin-line); }
 .category-image { width: 88px; height: 76px; }
+.category-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.category-heading h2 { margin: 0; }
 .category-copy p { max-width: 680px; margin: 7px 0 0; color: var(--admin-muted); font-size: 12px; line-height: 1.55; }
+.status-stack { display: grid; gap: 6px; }
+.visibility-state { display: inline-flex; align-items: center; gap: 6px; color: var(--admin-success); font-size: 10px; font-weight: 700; white-space: nowrap; }
+.visibility-state::before { width: 5px; height: 5px; border-radius: 50%; background: currentColor; content: ''; }
+.visibility-state.hidden { color: var(--admin-muted); }
 .row-actions { display: flex; justify-content: flex-end; gap: 7px; }
 .row-actions button, .editor-drawer > header button {
   display: grid;
