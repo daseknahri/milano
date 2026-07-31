@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { fallbackContent } from '../data/fallback'
-import { referenceCategories, referenceProducts } from '../data/referenceShop'
 import { StoreContext } from './store'
 
 const asList = (value) => {
@@ -12,18 +11,12 @@ const normalizeContent = (data) => {
   const savedCategories = Array.isArray(data?.categories)
     ? data.categories
     : fallbackContent.categories
-  const categoryMap = new Map()
-  referenceCategories.forEach((category) => categoryMap.set(category.id, category))
-  savedCategories.forEach((category) => categoryMap.set(category.id, category))
-  const categories = [...categoryMap.values()].sort((a, b) => (a.order || 0) - (b.order || 0))
+  const categories = [...savedCategories].sort((a, b) => (a.order || 0) - (b.order || 0))
   const categoryNames = new Map(categories.map((category) => [category.id, category.name]))
   const savedProducts = Array.isArray(data?.products)
     ? data.products
     : fallbackContent.products
-  const productMap = new Map()
-  referenceProducts.forEach((product) => productMap.set(String(product.id), product))
-  savedProducts.forEach((product) => productMap.set(String(product.id), product))
-  const products = [...productMap.values()]
+  const products = [...savedProducts]
 
   return {
     settings: { ...fallbackContent.settings, ...(data?.settings || {}) },
