@@ -92,6 +92,14 @@ test('admin can update settings and create then delete content', async () => {
   assert.equal(unsafeHrefResponse.status, 200);
   assert.equal((await unsafeHrefResponse.json()).heroCtaHref, '');
 
+  const unsafeSocialResponse = await fetch(`${baseUrl}/api/admin/settings`, {
+    method: 'PUT',
+    headers: { cookie, 'content-type': 'application/json' },
+    body: JSON.stringify({ youtube: 'javascript:alert(document.domain)' }),
+  });
+  assert.equal(unsafeSocialResponse.status, 200);
+  assert.equal((await unsafeSocialResponse.json()).youtube, '');
+
   const categoryResponse = await fetch(`${baseUrl}/api/admin/categories`, {
     method: 'POST',
     headers: { cookie, 'content-type': 'application/json' },
