@@ -12,6 +12,7 @@ export const fallbackContent = {
     heroImage: '/assets/hero-milan-night.webp',
     heroCtaLabel: 'Découvrir la collection',
     heroCtaHref: '#categories',
+    logo: '/assets/logo-mark.png',
     phone: '+212 664 575 655',
     whatsapp: '212664575655',
     email: '',

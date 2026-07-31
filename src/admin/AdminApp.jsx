@@ -48,6 +48,7 @@ const EMPTY_SETTINGS = {
   heroImage: '',
   heroCtaLabel: '',
   heroCtaHref: '',
+  logo: '',
   phone: '',
   whatsapp: '',
   email: '',
@@ -570,6 +571,7 @@ function SettingsView({ settings, onSaved, notify }) {
         <Field label="Brand name" required><input value={form.brandName} onChange={(e) => change('brandName', e.target.value)} required /></Field>
         <Field label="Short name" hint="Used where space is limited."><input value={form.shortName} onChange={(e) => change('shortName', e.target.value)} /></Field>
         <Field label="Announcement" wide><input value={form.announcement} onChange={(e) => change('announcement', e.target.value)} placeholder="Free delivery in Casablanca…" /></Field>
+        <UploadField label="Logo mark" value={form.logo} onChange={(value) => change('logo', value)} onStatus={notify} wide />
       </FormSection>
 
       <FormSection index="02" title="Homepage hero" description="Keep the headline concise and pair it with a strong automotive image.">

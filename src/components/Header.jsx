@@ -31,7 +31,7 @@ export default function Header() {
         </nav>
       </div>
       <header className="site-header">
-        <Link to="/" className="brand-link" aria-label="Milan Automobile Accessoires - accueil"><Logo /></Link>
+        <Link to="/" className="brand-link" aria-label="Milan Automobile Accessoires - accueil"><Logo src={settings.logo} /></Link>
         <nav className="desktop-nav" aria-label="Navigation principale">
           {links.map(([to, label]) => (
             <NavLink key={to} to={to} end={to === '/'}>{label}</NavLink>
@@ -71,7 +71,7 @@ export default function Header() {
             exit={{ opacity: 0 }}
           >
             <button data-overlay-autofocus className="icon-button mobile-menu__close" onClick={() => setMenuOpen(false)} aria-label="Fermer le menu"><X /></button>
-            <Logo light />
+            <Logo light src={settings.logo} />
             <nav aria-label="Navigation mobile">
               {links.map(([to, label], index) => (
                 <motion.div key={to} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.06 }}>

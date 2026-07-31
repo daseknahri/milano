@@ -18,7 +18,7 @@ export default function Footer() {
       </div>
       <div className="footer-main footer-main--shop">
         <div className="footer-brand">
-          <Logo light />
+          <Logo light src={settings.logo} />
           <p>{settings.footerText || 'Specialistes des accessoires automobile, pieces de carrosserie, activation CarPlay et lumiere d ambiance.'}</p>
           <div className="footer-help">
             <span>Avez-vous besoin d aide ?</span>
