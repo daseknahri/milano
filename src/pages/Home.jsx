@@ -13,7 +13,7 @@ import {
   Wrench,
 } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { Link, createSearchParams } from 'react-router-dom'
+import { Link, createSearchParams, useNavigate } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import { useStore } from '../context/store'
 import { finderMakes, referenceBrands, referencePartners } from '../data/referenceShop'
@@ -174,6 +174,16 @@ export default function Home() {
 }
 
 function ProductFinder({ finder, models, setFinder, target }) {
+  const navigate = useNavigate()
+  const submitFinder = (event) => {
+    event.preventDefault()
+    navigate(target)
+  }
+  const submitOnEnter = (event) => {
+    if (event.key !== 'Enter') return
+    event.preventDefault()
+    navigate(target)
+  }
   const update = (key, value) => setFinder((current) => ({
     ...current,
     [key]: value,
@@ -181,7 +191,7 @@ function ProductFinder({ finder, models, setFinder, target }) {
   }))
 
   return (
-    <motion.form className="product-finder" variants={heroItem} onSubmit={(event) => event.preventDefault()}>
+    <motion.form className="product-finder" variants={heroItem} onSubmit={submitFinder}>
       <div className="product-finder__head">
         <Search size={18} />
         <span>Veuillez selectionner la marque et modele de votre voiture.</span>
@@ -194,12 +204,12 @@ function ProductFinder({ finder, models, setFinder, target }) {
         <option value="">Modele</option>
         {models.map((model) => <option key={model} value={model}>{model}</option>)}
       </select>
-      <input value={finder.q} onChange={(event) => update('q', event.target.value)} placeholder="Nom du produit" aria-label="Nom du produit" />
+      <input value={finder.q} onChange={(event) => update('q', event.target.value)} onKeyDown={submitOnEnter} placeholder="Nom du produit" aria-label="Nom du produit" />
       <select value={finder.annee} onChange={(event) => update('annee', event.target.value)} aria-label="Annee">
         <option value="">Annee</option>
         {years.map((year) => <option key={year} value={year}>{year}</option>)}
       </select>
-      <Link className="button button--accent" to={target}>Chercher votre produit</Link>
+      <button type="submit" className="button button--accent">Chercher votre produit</button>
     </motion.form>
   )
 }
