@@ -37,6 +37,8 @@ export default function ProductDetail() {
   if (loading && !product) return <PageLoader />
   if (!product) return <NotFound compact />
   const gallery = product.gallery?.length ? product.gallery : [product.image]
+  const vehicleModels = asList(product.vehicleModels)
+  const years = asList(product.years)
   const activeImage = gallerySelection.productId === String(product.id) ? gallerySelection.index : 0
   const displayedImage = Math.min(activeImage, gallery.length - 1)
   const related = products.filter((item) => item.id !== product.id && item.category === product.category).slice(0, 3)
@@ -60,16 +62,16 @@ export default function ProductDetail() {
             {product.badge && <span className="product-badge">{product.badge}</span>}
             {gallery.length > 1 && (
               <div className="gallery-navigation" aria-label="Navigation de la galerie">
-                <button onClick={() => moveGallery(-1)} aria-label="Image précédente"><ArrowLeft size={19} /></button>
+                <button type="button" onClick={() => moveGallery(-1)} aria-label="Image précédente"><ArrowLeft size={19} /></button>
                 <span>{displayedImage + 1} / {gallery.length}</span>
-                <button onClick={() => moveGallery(1)} aria-label="Image suivante"><ArrowRight size={19} /></button>
+                <button type="button" onClick={() => moveGallery(1)} aria-label="Image suivante"><ArrowRight size={19} /></button>
               </div>
             )}
           </div>
           {gallery.length > 1 && (
             <div className="product-gallery__thumbs">
               {gallery.map((image, index) => (
-                <button className={index === displayedImage ? 'active' : ''} onClick={() => setGallerySelection({ productId: String(product.id), index })} aria-label={`Afficher la vue ${index + 1}`} aria-pressed={index === displayedImage} key={image}>
+                <button type="button" className={index === displayedImage ? 'active' : ''} onClick={() => setGallerySelection({ productId: String(product.id), index })} aria-label={`Afficher la vue ${index + 1}`} aria-pressed={index === displayedImage} key={image}>
                   <img src={image} alt={`Vue ${index + 1}`} onError={imageFallback} />
                 </button>
               ))}
@@ -83,11 +85,22 @@ export default function ProductDetail() {
             <strong>{productPriceLabel(product)}</strong>
             {Number(product.compareAtPrice) > 0 && <del>{formatPrice(product.compareAtPrice)}</del>}
           </div>
+          <div className={`product-info__status ${product.inStock === false ? 'is-out' : ''}`}>
+            <span aria-hidden="true" />
+            {product.inStock === false ? 'Indisponible actuellement' : 'Disponible pour commande'}
+          </div>
           <p className="product-info__description">{product.description}</p>
           <div className="compatibility">
-            <span>Compatibilité indicative</span>
-            <p>{product.vehicleModels?.join(' · ') || 'Nous consulter'}</p>
-            <small>{product.years?.join(' · ')}</small>
+            <div className="compatibility__head">
+              <span>Compatibilité indicative</span>
+              <small>Vérification avant installation</small>
+            </div>
+            <div className="compatibility__chips">
+              {product.brand && <span>{product.brand}</span>}
+              {vehicleModels.map((model) => <span key={model}>{model}</span>)}
+              {years.map((range) => <span key={range}>{range}</span>)}
+              {!vehicleModels.length && !years.length && <span>Nous consulter</span>}
+            </div>
           </div>
           <ul className="feature-list">
             {product.features?.map((feature) => <li key={feature}><Check size={16} /> {feature}</li>)}
@@ -114,11 +127,16 @@ export default function ProductDetail() {
         <section className="related section section--light">
           <div className="section-heading">
             <div><span className="eyebrow">Même univers</span><h2>À considérer aussi.</h2></div>
-            <Link className="text-link" to={`/catalogue?categorie=${encodeURIComponent(product.category)}`}>Tout voir <ArrowRight size={16} /></Link>
+            <Link className="text-link" to={`/catalogue?categorie=${encodeURIComponent(product.categoryId || product.category)}`}>Tout voir <ArrowRight size={16} /></Link>
           </div>
           <div className="featured-products">{related.map((item) => <ProductCard product={item} key={item.id} />)}</div>
         </section>
       )}
     </main>
   )
+}
+
+function asList(value) {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  return value ? [value] : []
 }

@@ -311,11 +311,16 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .product-info h1 { margin: .9rem 0 1rem; font: 500 clamp(2rem, 3.5vw, 3.8rem)/1.02 var(--display); letter-spacing: -.045em; }
 .product-info__price { display: flex; gap: .8rem; align-items: center; font-size: 1.08rem; }
 .product-info__price del { color: #999; font-size: .8rem; }
+.product-info__status { display: inline-flex; align-items: center; gap: .45rem; margin-top: .7rem; color: #2d8a58; font-size: .68rem; font-weight: 700; }
+.product-info__status > span { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.product-info__status.is-out { color: #9a432f; }
 .product-info__description { color: #65615a; line-height: 1.8; margin: 1.8rem 0; }
 .compatibility { padding: 1.2rem 0; border-block: 1px solid var(--line); }
-.compatibility > span { display: block; font-size: .6rem; text-transform: uppercase; letter-spacing: .12em; color: #777; }
-.compatibility p { margin: .55rem 0 .25rem; font-size: .77rem; }
-.compatibility small { color: #8b877f; }
+.compatibility__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.compatibility__head > span { display: block; font-size: .6rem; text-transform: uppercase; letter-spacing: .12em; color: #777; }
+.compatibility__head small { color: #8b877f; font-size: .62rem; }
+.compatibility__chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .7rem; }
+.compatibility__chips span { border: 1px solid var(--line); padding: .42rem .6rem; color: #4f4b45; font-size: .68rem; }
 .feature-list { list-style: none; padding: 1.2rem 0; margin: 0; display: grid; gap: .65rem; font-size: .75rem; }
 .feature-list li { display: flex; gap: .6rem; align-items: center; }
 .feature-list svg { color: var(--accent); }
@@ -558,6 +563,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .product-gallery__thumbs button { width: 64px; height: 64px; flex: 0 0 auto; }
   .product-info { padding: 3rem 1.2rem; }
   .product-info__actions { grid-template-columns: 1fr; }
+  .compatibility__head { align-items: flex-start; flex-direction: column; gap: .3rem; }
   .workshop-hero { min-height: 550px; }
   .process__steps { grid-template-columns: 1fr; }
   .process article, .process article:not(:first-child) { border-right: 0; border-bottom: 1px solid rgba(255,255,255,.15); padding: 2rem 0; }
