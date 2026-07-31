@@ -79,6 +79,10 @@ export default function Header() {
                 </motion.div>
               ))}
             </nav>
+            <div className="mobile-menu__utilities">
+              <Link to="/wishlist" onClick={() => setMenuOpen(false)}><Heart size={17} /> Liste des souhaits {wishlistCount > 0 && <span>{wishlistCount}</span>}</Link>
+              <Link to="/admin" onClick={() => setMenuOpen(false)}><UserRound size={17} /> Mon compte</Link>
+            </div>
             <p>{settings.address}<br />{settings.hours}</p>
           </motion.div>
         )}

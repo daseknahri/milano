@@ -83,6 +83,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .mobile-menu nav { margin: auto 0; }
 .mobile-menu nav a { display: block; padding: .8rem 0; font: 500 clamp(2rem, 10vw, 3.5rem)/1.05 var(--display); border-bottom: 1px solid rgba(255,255,255,.12); }
 .mobile-menu nav a.active { color: var(--accent-bright); }
+.mobile-menu__utilities { display: flex; flex-wrap: wrap; gap: .65rem 1.1rem; margin-bottom: 1.6rem; }
+.mobile-menu__utilities a { display: inline-flex; align-items: center; gap: .45rem; color: #d0ccc4; font-size: .75rem; }
+.mobile-menu__utilities a:hover { color: var(--accent-bright); }
+.mobile-menu__utilities span { display: grid; min-width: 17px; height: 17px; place-items: center; border-radius: 50%; background: var(--accent); color: #17130e; font-size: .58rem; font-weight: 800; }
 .mobile-menu > p { color: #aaa; font-size: .8rem; line-height: 1.7; }
 
 .hero { height: calc(100svh - 105px); height: calc(100dvh - 105px); min-height: 520px; max-height: 900px; position: relative; overflow: hidden; color: white; }
