@@ -4,15 +4,30 @@ import { useStore } from '../context/store'
 import { formatPrice, imageFallback, productPriceLabel } from '../utils'
 
 export default function ProductCard({ product, priority = false }) {
-  const { addToCart } = useStore()
+  const { addToCart, toggleWishlist, isWishlisted } = useStore()
+  const wished = isWishlisted(product.id)
   return (
     <article className="product-card">
-      <Link to={`/produit/${product.slug}`} className="product-card__media">
-        <img src={product.image} alt={product.name} loading={priority ? 'eager' : 'lazy'} onError={imageFallback} />
-        {product.badge && <span className="product-badge">{product.badge}</span>}
-        <span className="wishlist-dot" aria-hidden="true"><Heart size={16} /></span>
-        <span className="product-card__view">Voir le detail <ArrowUpRight size={16} /></span>
-      </Link>
+      <div className="product-card__media">
+        <Link to={`/produit/${product.slug}`} className="product-card__media-link" aria-label={`Voir ${product.name}`}>
+          <img src={product.image} alt={product.name} loading={priority ? 'eager' : 'lazy'} onError={imageFallback} />
+          {product.badge && <span className="product-badge">{product.badge}</span>}
+          <span className="product-card__view">Voir le detail <ArrowUpRight size={16} /></span>
+        </Link>
+        <button
+          className={`wishlist-dot ${wished ? 'is-active' : ''}`}
+          type="button"
+          aria-label={wished ? `Retirer ${product.name} des favoris` : `Ajouter ${product.name} aux favoris`}
+          aria-pressed={wished}
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            toggleWishlist(product)
+          }}
+        >
+          <Heart size={16} fill={wished ? 'currentColor' : 'none'} />
+        </button>
+      </div>
       <div className="product-card__body">
         <div>
           <p>{product.category} / {product.brand}</p>

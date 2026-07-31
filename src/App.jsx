@@ -12,6 +12,7 @@ import Home from './pages/Home'
 import NotFound from './pages/NotFound'
 import ProductDetail from './pages/ProductDetail'
 import Workshop from './pages/Workshop'
+import Wishlist from './pages/Wishlist'
 
 const AdminApp = lazy(() => import('./admin/AdminApp'))
 
@@ -57,6 +58,7 @@ function SiteRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/catalogue" element={<Catalog />} />
           <Route path="/produit/:slug" element={<ProductDetail />} />
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/atelier" element={<Workshop />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<NotFound />} />

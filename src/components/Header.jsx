@@ -15,7 +15,7 @@ const links = [
 ]
 
 export default function Header() {
-  const { settings, cartCount, setCartOpen } = useStore()
+  const { settings, cartCount, wishlistCount, setCartOpen } = useStore()
   const [menuOpen, setMenuOpen] = useState(false)
   const { overlayRef, triggerRef } = useOverlayDialog(menuOpen, () => setMenuOpen(false))
   return (
@@ -26,7 +26,7 @@ export default function Header() {
         <nav aria-label="Liens rapides">
           <Link to="/atelier">A propos</Link>
           <Link to="/admin">Mon compte</Link>
-          <Link to="/catalogue">Liste des souhaits</Link>
+          <Link to="/wishlist">Liste des souhaits</Link>
           <Link to="/contact">Order Tracking</Link>
         </nav>
       </div>
@@ -44,8 +44,9 @@ export default function Header() {
           <Link className="icon-button account-button" to="/admin" aria-label="Mon compte">
             <UserRound size={19} />
           </Link>
-          <Link className="icon-button wishlist-button" to="/catalogue" aria-label="Liste des souhaits">
+          <Link className="icon-button wishlist-button" to="/wishlist" aria-label={`Liste des souhaits, ${wishlistCount} articles`}>
             <Heart size={19} />
+            {wishlistCount > 0 && <span>{wishlistCount}</span>}
           </Link>
           <button className="icon-button cart-button" onClick={() => setCartOpen(true)} aria-label={`Panier, ${cartCount} articles`}>
             <ShoppingBag size={19} />

@@ -5,7 +5,6 @@ import {
   ArrowUpRight,
   BadgePercent,
   CheckCircle2,
-  ChevronRight,
   Headphones,
   Play,
   Search,
@@ -13,7 +12,7 @@ import {
   Truck,
   Wrench,
 } from 'lucide-react'
-import { useMemo, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, createSearchParams } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import { useStore } from '../context/store'
@@ -103,7 +102,7 @@ export default function Home() {
             <Link className="best-category" to={`/catalogue?categorie=${encodeURIComponent(category.name)}`} key={category.id}>
               <img src={category.image} alt="" loading="lazy" onError={imageFallback} />
               <span>{category.name}</span>
-              <small>{products.filter((product) => product.category === category.name || product.categoryId === category.id).length || 42} items</small>
+              <small>{categoryMeta(category, products)}</small>
             </Link>
           ))}
         </div>
@@ -220,4 +219,9 @@ function SectionHead({ eyebrow, title, action, to, light = false }) {
 const heroItem = {
   hidden: { opacity: 0, y: 22 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
+}
+
+function categoryMeta(category, products) {
+  const count = products.filter((product) => product.category === category.name || product.categoryId === category.id).length
+  return count ? `${count} reference${count === 1 ? '' : 's'}` : 'Disponible sur demande'
 }

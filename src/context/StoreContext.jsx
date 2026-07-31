@@ -66,6 +66,15 @@ export function StoreProvider({ children }) {
     }
   })
   const [cartOpen, setCartOpen] = useState(false)
+  const [wishlistIds, setWishlistIds] = useState(() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem('milan-wishlist') || '[]')
+      if (!Array.isArray(stored)) return []
+      return [...new Set(stored.map((id) => String(id)).filter(Boolean))].slice(0, 100)
+    } catch {
+      return []
+    }
+  })
 
   useEffect(() => {
     const controller = new AbortController()
@@ -97,6 +106,14 @@ export function StoreProvider({ children }) {
       // The cart remains usable in memory when storage is blocked or full.
     }
   }, [cart])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('milan-wishlist', JSON.stringify(wishlistIds))
+    } catch {
+      // The wishlist remains usable in memory when storage is blocked or full.
+    }
+  }, [wishlistIds])
 
   const hydratedCart = useMemo(() => {
     if (loading) return cart
@@ -130,6 +147,18 @@ export function StoreProvider({ children }) {
     )
   }, [])
 
+  const toggleWishlist = useCallback((product) => {
+    const id = String(product.id)
+    setWishlistIds((current) => current.includes(id)
+      ? current.filter((item) => item !== id)
+      : [...current, id].slice(-100))
+  }, [])
+
+  const wishlist = useMemo(() => {
+    const currentProducts = new Map(content.products.map((product) => [String(product.id), product]))
+    return wishlistIds.map((id) => currentProducts.get(id)).filter(Boolean)
+  }, [content.products, wishlistIds])
+
   const retryContent = useCallback(() => {
     setLoading(true)
     setUsingFallback(false)
@@ -147,9 +176,13 @@ export function StoreProvider({ children }) {
       setCartOpen,
       addToCart,
       updateQuantity,
+      wishlist,
+      wishlistCount: wishlist.length,
+      toggleWishlist,
+      isWishlisted: (id) => wishlistIds.includes(String(id)),
       cartCount: hydratedCart.reduce((sum, item) => sum + item.quantity, 0),
     }),
-    [content, loading, usingFallback, hydratedCart, cartOpen, addToCart, updateQuantity, retryContent],
+    [content, loading, usingFallback, hydratedCart, cartOpen, addToCart, updateQuantity, wishlist, wishlistIds, toggleWishlist, retryContent],
   )
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>

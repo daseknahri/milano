@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, MessageCircle, ShieldCheck, ShoppingBag, Wrench } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Heart, MessageCircle, ShieldCheck, ShoppingBag, Wrench } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
@@ -10,7 +10,7 @@ import NotFound from './NotFound'
 
 export default function ProductDetail() {
   const { slug } = useParams()
-  const { products, addToCart, settings, loading } = useStore()
+  const { products, addToCart, settings, loading, toggleWishlist, isWishlisted } = useStore()
   const product = products.find((item) => item.slug === slug || String(item.id) === slug)
   const [gallerySelection, setGallerySelection] = useState({ productId: '', index: 0 })
   useSeo(product?.name || 'Produit', product?.description || 'Accessoire automobile Milan.', {
@@ -40,6 +40,7 @@ export default function ProductDetail() {
   const activeImage = gallerySelection.productId === String(product.id) ? gallerySelection.index : 0
   const displayedImage = Math.min(activeImage, gallery.length - 1)
   const related = products.filter((item) => item.id !== product.id && item.category === product.category).slice(0, 3)
+  const wished = isWishlisted(product.id)
 
   function moveGallery(direction) {
     setGallerySelection({
@@ -98,6 +99,9 @@ export default function ProductDetail() {
             <a className="button button--outline" href={whatsappLink(settings.whatsapp, inquiry)} target="_blank" rel="noreferrer">
               <MessageCircle size={18} /> Vérifier la compatibilité
             </a>
+            <button className={`button button--outline wishlist-action ${wished ? 'is-active' : ''}`} type="button" onClick={() => toggleWishlist(product)} aria-pressed={wished}>
+              <Heart size={18} fill={wished ? 'currentColor' : 'none'} /> {wished ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+            </button>
           </div>
           {!product.inStock && <p className="stock-note">Disponible sur commande — contactez-nous pour le délai.</p>}
           <div className="product-assurance">

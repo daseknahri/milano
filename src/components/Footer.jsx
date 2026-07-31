@@ -27,7 +27,7 @@ export default function Footer() {
           <Link to="/admin">Mon compte</Link>
           <Link to="/contact">Mes commandes</Link>
           <Link to="/contact">Track Products</Link>
-          <Link to="/catalogue">Liste des souhaits</Link>
+          <Link to="/wishlist">Liste des souhaits</Link>
         </div>
         <div>
           <span className="footer-title">Liens utiles</span>
