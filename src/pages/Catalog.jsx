@@ -17,6 +17,7 @@ export default function Catalog() {
   const brand = params.get('marque') || ''
   const model = params.get('modele') || ''
   const year = params.get('annee') || ''
+  const sort = params.get('tri') || 'featured'
   const selectedCategory = categories.find((item) => item.id === category || item.name === category)
   useSeo('Catalogue Milan Auto', 'Accessoires automobiles premium, disponibles et installes a Tanger.')
 
@@ -33,7 +34,7 @@ export default function Catalog() {
 
   const results = useMemo(() => {
     const needle = normalizeText(query.trim())
-    return products.filter((product) => {
+    const filtered = products.filter((product) => {
       const haystack = normalizeText([
         product.name,
         product.brand,
@@ -49,7 +50,8 @@ export default function Catalog() {
         && (!model || product.vehicleModels?.includes(model))
         && (!year || normalizeYears(product.years).includes(year))
     })
-  }, [products, query, category, brand, model, year])
+    return filtered.sort((a, b) => compareProducts(a, b, sort))
+  }, [products, query, category, brand, model, year, sort])
 
   useEffect(() => {
     const desktop = window.matchMedia('(min-width: 821px)')
@@ -121,6 +123,15 @@ export default function Catalog() {
           <button ref={triggerRef} type="button" className="filter-toggle" onClick={() => setFiltersOpen((value) => !value)} aria-expanded={filtersOpen} aria-controls="catalog-filters">
             <SlidersHorizontal size={18} /> Filtres {activeFilters.length > 0 && <span className="filter-toggle__count">{activeFilters.length}</span>}
           </button>
+          <label className="catalog-sort">
+            <span>Trier par</span>
+            <select aria-label="Trier les produits" value={sort} onChange={(event) => setFilter('tri', event.target.value, true)}>
+              <option value="featured">Recommandes</option>
+              <option value="price-asc">Prix croissant</option>
+              <option value="price-desc">Prix decroissant</option>
+              <option value="name">Nom A-Z</option>
+            </select>
+          </label>
           <span className="result-count" aria-live="polite">{results.length} reference{results.length !== 1 ? 's' : ''}</span>
         </div>
         {hasFilters && (
@@ -192,6 +203,18 @@ function matchesCategory(product, selected) {
 
 function normalizeText(value) {
   return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+}
+
+function compareProducts(a, b, sort) {
+  if (sort === 'price-asc') return priceValue(a) - priceValue(b)
+  if (sort === 'price-desc') return priceValue(b) - priceValue(a)
+  if (sort === 'name') return String(a.name || '').localeCompare(String(b.name || ''), 'fr', { sensitivity: 'base' })
+  return Number(Boolean(b.featured)) - Number(Boolean(a.featured))
+}
+
+function priceValue(product) {
+  const price = Number(product.price)
+  return Number.isFinite(price) && price > 0 ? price : Number.POSITIVE_INFINITY
 }
 
 function normalizeYears(value) {

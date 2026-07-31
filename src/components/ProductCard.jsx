@@ -6,6 +6,10 @@ import { formatPrice, imageFallback, productPriceLabel } from '../utils'
 export default function ProductCard({ product, priority = false }) {
   const { addToCart, toggleWishlist, isWishlisted } = useStore()
   const wished = isWishlisted(product.id)
+  const fitment = [
+    asList(product.vehicleModels).slice(0, 2).join(', '),
+    asList(product.years).slice(0, 1).join(''),
+  ].filter(Boolean).join(' · ')
   return (
     <article className="product-card">
       <div className="product-card__media">
@@ -31,12 +35,13 @@ export default function ProductCard({ product, priority = false }) {
       <div className="product-card__body">
         <div>
           <p>{product.category} / {product.brand}</p>
+          {fitment && <p className="product-card__fitment">Compatible : {fitment}</p>}
           <Link to={`/produit/${product.slug}`}><h3>{product.name}</h3></Link>
           <div className="product-price">
             <strong>{productPriceLabel(product)}</strong>
             {Number(product.compareAtPrice) > 0 && <del>{formatPrice(product.compareAtPrice)}</del>}
           </div>
-          <span className={`stock-pill ${product.inStock === false ? 'out' : ''}`}>{product.inStock === false ? 'Out of stock' : 'In Stock'}</span>
+          <span className={`stock-pill ${product.inStock === false ? 'out' : ''}`}>{product.inStock === false ? 'Indisponible' : 'Disponible'}</span>
         </div>
         <button
           className="quick-add"
@@ -49,4 +54,9 @@ export default function ProductCard({ product, priority = false }) {
       </div>
     </article>
   )
+}
+
+function asList(value) {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  return value ? [value] : []
 }
