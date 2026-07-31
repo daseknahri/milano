@@ -14,7 +14,10 @@ export function useSeo(title, description, options = {}) {
   const schemaKey = schema ? JSON.stringify(schema) : ''
 
   useEffect(() => {
-    const fullTitle = `${title} — Milan Automobile Accessoires`
+    const brandName = 'Milan Automobile Accessoires'
+    const fullTitle = title?.toLocaleLowerCase().includes(brandName.toLocaleLowerCase())
+      ? title
+      : `${title} — ${brandName}`
     const canonicalUrl = new URL(window.location.pathname, window.location.origin).href
     const absoluteImage = toAbsoluteUrl(image)
     document.title = fullTitle

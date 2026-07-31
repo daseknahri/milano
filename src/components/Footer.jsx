@@ -5,11 +5,16 @@ import Logo from './Logo'
 
 export default function Footer() {
   const { settings, categories } = useStore()
+  const phoneHref = settings.phone ? `tel:${String(settings.phone).replace(/\s/g, '')}` : ''
+  const locationLabel = [settings.address, settings.city]
+    .filter(Boolean)
+    .filter((value, index, values) => values.indexOf(value) === index)
+    .join(', ') || 'Tanger, Maroc'
   return (
     <footer className="site-footer">
       <div className="footer-social">
         <span>Suivez-nous sur les reseaux sociaux</span>
-        <a href={settings.instagram} target="_blank" rel="noreferrer"><Instagram size={18} /> @milanautomobileaccessoires</a>
+        {settings.instagram && <a href={settings.instagram} target="_blank" rel="noreferrer"><Instagram size={18} /> @milanautomobileaccessoires</a>}
       </div>
       <div className="footer-main footer-main--shop">
         <div className="footer-brand">
@@ -17,8 +22,8 @@ export default function Footer() {
           <p>{settings.footerText || 'Specialistes des accessoires automobile, pieces de carrosserie, activation CarPlay et lumiere d ambiance.'}</p>
           <div className="footer-help">
             <span>Avez-vous besoin d aide ?</span>
-            <a href={`tel:${settings.phone.replace(/\s/g, '')}`}>{settings.phone}</a>
-            <small>{settings.hours}</small>
+            {phoneHref && <a href={phoneHref}>{settings.phone}</a>}
+            {settings.hours && <small>{settings.hours}</small>}
           </div>
         </div>
         <div>
@@ -43,10 +48,10 @@ export default function Footer() {
         </div>
         <div className="footer-contact">
           <span className="footer-title">Contact</span>
-          <a href={`tel:${settings.phone.replace(/\s/g, '')}`}><Phone size={15} /> {settings.phone}</a>
-          <a href={settings.mapUrl} target="_blank" rel="noreferrer"><MapPin size={15} /> {settings.address}</a>
-          <a href={settings.email ? `mailto:${settings.email}` : settings.instagram} target="_blank" rel="noreferrer"><Mail size={15} /> Envoyez-nous un message</a>
-          <a href={settings.instagram} target="_blank" rel="noreferrer">Instagram <ArrowUpRight size={13} /></a>
+          {phoneHref && <a href={phoneHref}><Phone size={15} /> {settings.phone}</a>}
+          {settings.mapUrl && <a href={settings.mapUrl} target="_blank" rel="noreferrer"><MapPin size={15} /> {locationLabel}</a>}
+          {settings.email && <a href={`mailto:${settings.email}`}><Mail size={15} /> Envoyez-nous un message</a>}
+          {settings.instagram && <a href={settings.instagram} target="_blank" rel="noreferrer">Instagram <ArrowUpRight size={13} /></a>}
         </div>
       </div>
       <div className="footer-bottom">
