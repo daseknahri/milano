@@ -788,6 +788,8 @@ function ProductsView({ products, setProducts, categories, notify }) {
       || (filter === 'featured' && product.featured)
       || (filter === 'stock' && product.inStock !== false)
       || (filter === 'out' && product.inStock === false)
+      || (filter === 'published' && product.active !== false)
+      || (filter === 'hidden' && product.active === false)
     return matchesQuery && matchesFilter
   }), [products, query, filter])
 
@@ -828,7 +830,7 @@ function ProductsView({ products, setProducts, categories, notify }) {
       <div className="catalog-toolbar">
         <div className="search-box"><Search size={17} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search products, brands, categories…" /></div>
         <div className="filter-tabs">
-          {[['all', 'All'], ['featured', 'Featured'], ['stock', 'In stock'], ['out', 'Out of stock']].map(([value, label]) => (
+          {[['all', 'All'], ['featured', 'Featured'], ['stock', 'In stock'], ['out', 'Out of stock'], ['published', 'Published'], ['hidden', 'Hidden']].map(([value, label]) => (
             <button key={value} className={filter === value ? 'active' : ''} onClick={() => setFilter(value)}>{label}</button>
           ))}
         </div>
