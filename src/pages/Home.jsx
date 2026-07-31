@@ -190,7 +190,7 @@ function ProductFinder({ finder, models, setFinder, target }) {
         <option value="">Marque</option>
         {Object.keys(finderMakes).map((make) => <option key={make} value={make}>{make}</option>)}
       </select>
-      <select value={finder.modele} onChange={(event) => update('modele', event.target.value)} aria-label="Modele">
+      <select value={finder.modele} onChange={(event) => update('modele', event.target.value)} aria-label="Modele" disabled={!finder.marque}>
         <option value="">Modele</option>
         {models.map((model) => <option key={model} value={model}>{model}</option>)}
       </select>

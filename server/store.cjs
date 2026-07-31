@@ -37,6 +37,19 @@ function cleanUrl(value, max = 1000) {
   }
 }
 
+function cleanHref(value, max = 200) {
+  const candidate = cleanText(value, max);
+  if (!candidate) return '';
+  // Allow anchors and local routes, but never protocol-relative or traversal paths.
+  if (/^(?:#|\/)(?!\/)[^\s]*$/.test(candidate) && !candidate.includes('..')) return candidate;
+  try {
+    const parsed = new URL(candidate);
+    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.toString().slice(0, max) : '';
+  } catch {
+    return '';
+  }
+}
+
 function cleanId(value, prefix) {
   const candidate = cleanText(value, 80).toLowerCase().replace(/[^a-z0-9_-]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
   return candidate || `${prefix}_${crypto.randomUUID().replaceAll('-', '').slice(0, 12)}`;
@@ -57,7 +70,7 @@ function sanitizeSettings(input = {}, previous = {}) {
     heroSubtitle: cleanMultiline(merged.heroSubtitle, 700),
     heroImage: cleanUrl(merged.heroImage),
     heroCtaLabel: cleanText(merged.heroCtaLabel, 60),
-    heroCtaHref: cleanText(merged.heroCtaHref, 200),
+    heroCtaHref: cleanHref(merged.heroCtaHref, 200),
     announcement: cleanText(merged.announcement, 220),
     aboutTitle: cleanText(merged.aboutTitle, 180),
     aboutText: cleanMultiline(merged.aboutText, 2000),

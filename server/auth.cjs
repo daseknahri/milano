@@ -106,15 +106,20 @@ function clearFailures(ip, identifier) {
 }
 
 function login(req, res) {
-  const identifier = String(req.body?.email || req.body?.username || '').trim().toLowerCase();
-  const password = String(req.body?.password || '');
+  // Bound credential input before using it as a rate-limit key or hashing it.
+  // This prevents oversized JSON values from consuming unbounded CPU/memory.
+  const rawIdentifier = String(req.body?.email || req.body?.username || '');
+  const rawPassword = String(req.body?.password || '');
+  const identifier = rawIdentifier.trim().toLowerCase().slice(0, 160);
+  const password = rawPassword.slice(0, 256);
+  const oversizedCredential = rawIdentifier.length > 160 || rawPassword.length > 256;
   if (isRateLimited(req.ip, identifier)) {
     res.set('Retry-After', String(Math.ceil(LOGIN_WINDOW_MS / 1000)));
     return res.status(429).json({ error: 'Trop de tentatives. Réessayez dans quelques minutes.' });
   }
   const matchesEmail = safeEqual(identifier, adminEmail);
   const matchesUsername = safeEqual(identifier, adminUsername);
-  if ((!matchesEmail && !matchesUsername) || !safeEqual(password, adminPassword)) {
+  if (oversizedCredential || (!matchesEmail && !matchesUsername) || !safeEqual(password, adminPassword)) {
     recordFailure(req.ip, identifier);
     return res.status(401).json({ error: 'Identifiants incorrects.' });
   }

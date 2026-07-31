@@ -84,6 +84,14 @@ test('admin can update settings and create then delete content', async () => {
   assert.equal(settingsResponse.status, 200);
   assert.equal((await settingsResponse.json()).announcement, 'Test persistant');
 
+  const unsafeHrefResponse = await fetch(`${baseUrl}/api/admin/settings`, {
+    method: 'PUT',
+    headers: { cookie, 'content-type': 'application/json' },
+    body: JSON.stringify({ heroCtaHref: 'javascript:alert(document.domain)' }),
+  });
+  assert.equal(unsafeHrefResponse.status, 200);
+  assert.equal((await unsafeHrefResponse.json()).heroCtaHref, '');
+
   const categoryResponse = await fetch(`${baseUrl}/api/admin/categories`, {
     method: 'POST',
     headers: { cookie, 'content-type': 'application/json' },
@@ -136,6 +144,16 @@ test('admin can update settings and create then delete content', async () => {
   });
   assert.equal(deleteResponse.status, 200);
   assert.equal((await deleteResponse.json()).deleted, true);
+});
+
+test('malformed JSON is rejected as a client error', async () => {
+  const response = await fetch(`${baseUrl}/api/admin/settings`, {
+    method: 'PUT',
+    headers: { cookie, 'content-type': 'application/json' },
+    body: '{"announcement":',
+  });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).error, /Unexpected|JSON|invalide/i);
 });
 
 test('upload validates file content and returns a persisted URL', async () => {

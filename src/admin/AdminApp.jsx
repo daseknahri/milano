@@ -306,7 +306,16 @@ function UploadField({ label, value, onChange, onStatus, wide = false }) {
             onChange={(event) => onChange(event.target.value)}
             placeholder="Paste an image URL or upload a file"
           />
-          <label className="secondary-button file-button">
+          <label
+            className="secondary-button file-button"
+            role="button"
+            tabIndex={uploading ? -1 : 0}
+            onKeyDown={(event) => {
+              if (event.key !== 'Enter' && event.key !== ' ') return
+              event.preventDefault()
+              event.currentTarget.querySelector('input')?.click()
+            }}
+          >
             {uploading ? <LoaderCircle className="spin" size={15} /> : <Upload size={15} />}
             {uploading ? 'Uploading…' : 'Upload media'}
             <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading} />
@@ -666,8 +675,8 @@ function CategoriesView({ categories, setCategories, notify }) {
                 <p>{category.description || 'No description has been added.'}</p>
               </div>
               <div className="row-actions">
-                <button onClick={() => setEditing(category)} aria-label={`Edit ${category.name}`}><Pencil size={16} /></button>
-                <button className="danger-icon" onClick={() => setDeleting(category)} aria-label={`Delete ${category.name}`}><Trash2 size={16} /></button>
+                <button type="button" onClick={() => setEditing(category)} aria-label={`Edit ${category.name}`}><Pencil size={16} /></button>
+                <button type="button" className="danger-icon" onClick={() => setDeleting(category)} aria-label={`Delete ${category.name}`}><Trash2 size={16} /></button>
               </div>
             </article>
           ))}
@@ -817,8 +826,8 @@ function ProductsView({ products, setProducts, categories, notify }) {
                   <td><span className={`stock-state ${product.inStock === false ? 'out' : ''}`}>{product.inStock === false ? 'Out of stock' : 'In stock'}</span></td>
                   <td>
                     <div className="row-actions">
-                      <button onClick={() => setEditing(product)} aria-label={`Edit ${product.name}`}><Pencil size={16} /></button>
-                      <button className="danger-icon" onClick={() => setDeleting(product)} aria-label={`Delete ${product.name}`}><Trash2 size={16} /></button>
+                      <button type="button" onClick={() => setEditing(product)} aria-label={`Edit ${product.name}`}><Pencil size={16} /></button>
+                      <button type="button" className="danger-icon" onClick={() => setDeleting(product)} aria-label={`Delete ${product.name}`}><Trash2 size={16} /></button>
                     </div>
                   </td>
                 </tr>
@@ -857,7 +866,10 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
   const [form, setForm] = useState({
     ...EMPTY_PRODUCT,
     ...product,
-    category: product.categoryId || product.category || '',
+    category: categories.find((item) => String(item.id) === String(product.categoryId || product.category) || item.name === product.category)?.id
+      || product.categoryId
+      || product.category
+      || '',
     vehicleModels: listToText(product.vehicleModels, ', '),
     features: listToText(product.features),
     gallery: Array.isArray(product.gallery) ? product.gallery : [],
@@ -924,7 +936,7 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
 
   return (
     <EditorDrawer title={product.id ? 'Edit product' : 'Add product'} wide onClose={onClose} busy={saving || galleryUploading}>
-      <form className="drawer-form product-form" onSubmit={submit} noValidate aria-busy={saving}>
+      <form className="drawer-form product-form" onSubmit={submit} noValidate aria-busy={saving || galleryUploading}>
         <div className="drawer-form-body product-editor-body">
           <DrawerSection index="01" title="Product identity" description="The information customers use to recognize and browse this item.">
             <Field label="Product name" required wide><input autoFocus value={form.name} onChange={(e) => handleNameChange(e.target.value)} required /></Field>
@@ -963,7 +975,16 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
                     <button type="button" onClick={() => change('gallery', form.gallery.filter((item) => item !== url))} aria-label="Remove image"><X size={14} /></button>
                   </div>
                 ))}
-                <label className="gallery-upload">
+                <label
+                  className="gallery-upload"
+                  role="button"
+                  tabIndex={galleryUploading ? -1 : 0}
+                  onKeyDown={(event) => {
+                    if (event.key !== 'Enter' && event.key !== ' ') return
+                    event.preventDefault()
+                    event.currentTarget.querySelector('input')?.click()
+                  }}
+                >
                   {galleryUploading ? <LoaderCircle className="spin" size={19} /> : <ImagePlus size={20} />}
                   <span>{galleryUploading ? 'Uploading…' : 'Upload'}</span>
                   <input type="file" accept="image/*" onChange={uploadGallery} disabled={galleryUploading} />
@@ -986,7 +1007,7 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
         <div className="drawer-actions">
           <div className="drawer-actions__copy"><span>Product draft</span><small>Save to publish changes to the storefront.</small></div>
           <button className="secondary-button" type="button" onClick={onClose} disabled={saving || galleryUploading}>Cancel</button>
-          <button className="primary-button" type="submit" disabled={saving}><Save size={16} />{saving ? 'Saving…' : 'Save product'}</button>
+          <button className="primary-button" type="submit" disabled={saving || galleryUploading}><Save size={16} />{saving ? 'Saving…' : galleryUploading ? 'Uploading…' : 'Save product'}</button>
         </div>
       </form>
     </EditorDrawer>
@@ -995,12 +1016,12 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
 
 function Toggle({ checked, onChange, label, description }) {
   return (
-    <label className="toggle-control">
+    <div className="toggle-control">
       <button type="button" role="switch" aria-checked={checked} className={checked ? 'checked' : ''} onClick={() => onChange(!checked)}>
         <span />
       </button>
       <span><strong>{label}</strong><small>{description}</small></span>
-    </label>
+    </div>
   )
 }
 
@@ -1013,7 +1034,7 @@ function EditorDrawer({ title, children, onClose, wide = false, busy = false }) 
       if (event.key === 'Escape' && !busy) onClose()
       if (event.key !== 'Tab') return
       const focusable = [...(dialogRef.current?.querySelectorAll(
-        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+        'button:not([disabled]):not(.dialog-scrim), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
       ) || [])].filter((element) => element.getClientRects().length)
       if (!focusable.length) return
       const first = focusable[0]
@@ -1038,8 +1059,8 @@ function EditorDrawer({ title, children, onClose, wide = false, busy = false }) 
   return createPortal(
     <div ref={dialogRef} className="dialog-layer" role="dialog" aria-modal="true" aria-label={title}>
       <button className="dialog-scrim" aria-label="Close editor" onClick={onClose} disabled={busy} />
-      <aside className={`editor-drawer ${wide ? 'wide' : ''}`}>
-        <header><div><p className="eyebrow">Catalogue editor</p><h2>{title}</h2></div><button onClick={onClose} aria-label="Close" disabled={busy}><X size={20} /></button></header>
+      <aside className={`editor-drawer ${wide ? 'wide' : ''}`} aria-labelledby="editor-drawer-title">
+        <header><div><p className="eyebrow">Catalogue editor</p><h2 id="editor-drawer-title">{title}</h2></div><button type="button" onClick={onClose} aria-label="Close" disabled={busy}><X size={20} /></button></header>
         <div className="drawer-content">{children}</div>
       </aside>
     </div>,
@@ -1049,37 +1070,57 @@ function EditorDrawer({ title, children, onClose, wide = false, busy = false }) 
 
 function ConfirmDialog({ title, description, onCancel, onConfirm }) {
   const [working, setWorking] = useState(false)
+  const dialogRef = useRef(null)
   const cancelButtonRef = useRef(null)
 
   useEffect(() => {
     const previouslyFocused = document.activeElement
     cancelButtonRef.current?.focus()
-    const handleEscape = (event) => {
+    const handleDialogKeys = (event) => {
       if (event.key === 'Escape' && !working) onCancel()
+      if (event.key !== 'Tab') return
+      const focusable = [...(dialogRef.current?.querySelectorAll('button:not([disabled]):not(.dialog-scrim), [href], [tabindex]:not([tabindex="-1"])') || [])]
+        .filter((element) => element.getClientRects().length)
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
-    document.addEventListener('keydown', handleEscape)
+    document.addEventListener('keydown', handleDialogKeys)
+    document.body.classList.add('drawer-open')
     return () => {
-      document.removeEventListener('keydown', handleEscape)
+      document.removeEventListener('keydown', handleDialogKeys)
+      document.body.classList.remove('drawer-open')
       previouslyFocused?.focus?.()
     }
   }, [onCancel, working])
 
   async function confirm() {
+    if (working) return
     setWorking(true)
-    await onConfirm()
-    setWorking(false)
+    try {
+      await onConfirm()
+    } finally {
+      setWorking(false)
+    }
   }
 
   return createPortal(
-    <div className="dialog-layer confirm-layer" role="alertdialog" aria-modal="true" aria-label={title}>
-      <button className="dialog-scrim" aria-label="Cancel" onClick={onCancel} />
+    <div ref={dialogRef} className="dialog-layer confirm-layer" role="alertdialog" aria-modal="true" aria-labelledby="confirm-dialog-title" aria-describedby="confirm-dialog-description">
+      <button className="dialog-scrim" type="button" aria-label="Cancel" onClick={onCancel} disabled={working} />
       <div className="confirm-dialog">
         <div className="confirm-icon"><Trash2 size={21} /></div>
-        <h2>{title}</h2>
-        <p>{description}</p>
+        <h2 id="confirm-dialog-title">{title}</h2>
+        <p id="confirm-dialog-description">{description}</p>
         <div>
-          <button ref={cancelButtonRef} className="secondary-button" onClick={onCancel}>Cancel</button>
-          <button className="danger-button" onClick={confirm} disabled={working}>{working ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={16} />}{working ? 'Deleting…' : 'Delete'}</button>
+          <button ref={cancelButtonRef} type="button" className="secondary-button" onClick={onCancel} disabled={working}>Cancel</button>
+          <button type="button" className="danger-button" onClick={confirm} disabled={working}>{working ? <LoaderCircle className="spin" size={16} /> : <Trash2 size={16} />}{working ? 'Deleting…' : 'Delete'}</button>
         </div>
       </div>
     </div>,

@@ -213,6 +213,10 @@ button:disabled { cursor: wait; opacity: .65; transform: none !important; }
 .upload-copy { display: flex; min-width: 0; flex-direction: column; justify-content: space-between; gap: 8px; }
 .file-button { align-self: flex-start; min-height: 36px; cursor: pointer; color: var(--admin-accent-light); font-size: 11px; }
 .file-button input, .gallery-upload input { display: none; }
+.file-button:focus-visible, .gallery-upload:focus-visible {
+  outline: 2px solid var(--admin-accent-light);
+  outline-offset: 3px;
+}
 
 .category-list { border-top: 1px solid var(--admin-line); }
 .category-row { display: grid; grid-template-columns: 94px minmax(0, 1fr) auto; align-items: center; gap: 25px; min-height: 124px; border-bottom: 1px solid var(--admin-line); }
@@ -346,7 +350,7 @@ button:disabled { cursor: wait; opacity: .65; transform: none !important; }
 .drawer-content { min-height: 0; flex: 1; overflow: hidden; }
 .drawer-form { display: flex; height: 100%; min-height: 0; flex-direction: column; padding: 0; }
 .drawer-form-body { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 0 32px 36px; scrollbar-gutter: stable; }
-.drawer-form-body { scrollbar-color: rgba(221, 184, 110, .42) transparent; scrollbar-width: thin; }
+.drawer-form-body { scrollbar-color: rgba(221, 184, 110, .42) transparent; scrollbar-width: thin; scroll-padding-bottom: 110px; }
 .drawer-form-body > .admin-field { margin-bottom: 22px; }
 .drawer-actions { z-index: 3; display: flex; min-height: 82px; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 10px; margin: 0; padding: 15px 32px max(15px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(221, 184, 110, .25); background: rgba(16, 20, 19, .98); box-shadow: 0 -16px 35px rgba(0, 0, 0, .18); backdrop-filter: blur(12px); }
 .drawer-actions__copy { display: grid; gap: 3px; margin-right: auto; }

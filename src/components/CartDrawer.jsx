@@ -57,10 +57,10 @@ export default function CartDrawer() {
                         <span>{productPriceLabel(item)}</span>
                         {item.inStock === false && <strong className="cart-item__unavailable">Indisponible — retirez cet article pour commander</strong>}
                         <div className="quantity">
-                          <button onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label="Réduire"><Minus size={14} /></button>
+                          <button type="button" onClick={() => updateQuantity(item.id, item.quantity - 1)} aria-label={`Réduire la quantité de ${item.name}`}><Minus size={14} /></button>
                           <span>{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label="Ajouter"><Plus size={14} /></button>
-                          <button className="remove" onClick={() => updateQuantity(item.id, 0)} aria-label="Supprimer"><Trash2 size={15} /></button>
+                          <button type="button" onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label={`Augmenter la quantité de ${item.name}`}><Plus size={14} /></button>
+                          <button type="button" className="remove" onClick={() => updateQuantity(item.id, 0)} aria-label={`Supprimer ${item.name} du panier`}><Trash2 size={15} /></button>
                         </div>
                       </div>
                     </article>

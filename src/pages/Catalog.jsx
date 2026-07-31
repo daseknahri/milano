@@ -206,10 +206,12 @@ function normalizeText(value) {
 }
 
 function compareProducts(a, b, sort) {
-  if (sort === 'price-asc') return priceValue(a) - priceValue(b)
-  if (sort === 'price-desc') return priceValue(b) - priceValue(a)
-  if (sort === 'name') return String(a.name || '').localeCompare(String(b.name || ''), 'fr', { sensitivity: 'base' })
-  return Number(Boolean(b.featured)) - Number(Boolean(a.featured))
+  let result = 0
+  if (sort === 'price-asc') result = priceValue(a) - priceValue(b)
+  else if (sort === 'price-desc') result = priceValue(b) - priceValue(a)
+  else if (sort === 'name') result = String(a.name || '').localeCompare(String(b.name || ''), 'fr', { sensitivity: 'base' })
+  else result = Number(Boolean(b.featured)) - Number(Boolean(a.featured))
+  return result || String(a.name || '').localeCompare(String(b.name || ''), 'fr', { sensitivity: 'base' })
 }
 
 function priceValue(product) {

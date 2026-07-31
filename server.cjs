@@ -41,7 +41,8 @@ const allowedTypes = {
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 4 },
+  // Keep multipart requests bounded even when a client sends no file.
+  limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 4, parts: 8 },
   fileFilter(_req, file, callback) {
     const extension = path.extname(file.originalname).toLowerCase().slice(1);
     const extensions = allowedTypes[file.mimetype];
@@ -345,6 +346,10 @@ if (require.main === module) {
   createApp()
     .then((app) => {
       const server = app.listen(PORT, HOST, () => console.log(`Milan Auto server listening on http://${HOST}:${PORT}`));
+      // Avoid connections being held indefinitely by slow or abandoned clients.
+      server.requestTimeout = 120_000;
+      server.headersTimeout = 15_000;
+      server.keepAliveTimeout = 5_000;
       const shutdown = (signal) => {
         console.log(`${signal} received, closing Milan Auto server.`);
         server.close((error) => process.exit(error ? 1 : 0));

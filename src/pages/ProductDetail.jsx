@@ -41,7 +41,10 @@ export default function ProductDetail() {
   const years = asList(product.years)
   const activeImage = gallerySelection.productId === String(product.id) ? gallerySelection.index : 0
   const displayedImage = Math.min(activeImage, gallery.length - 1)
-  const related = products.filter((item) => item.id !== product.id && item.category === product.category).slice(0, 3)
+  const related = products.filter((item) => item.id !== product.id && (
+    item.category === product.category ||
+    (product.categoryId && item.categoryId === product.categoryId)
+  )).slice(0, 3)
   const wished = isWishlisted(product.id)
 
   function moveGallery(direction) {
@@ -71,7 +74,7 @@ export default function ProductDetail() {
           {gallery.length > 1 && (
             <div className="product-gallery__thumbs">
               {gallery.map((image, index) => (
-                <button type="button" className={index === displayedImage ? 'active' : ''} onClick={() => setGallerySelection({ productId: String(product.id), index })} aria-label={`Afficher la vue ${index + 1}`} aria-pressed={index === displayedImage} key={image}>
+                <button type="button" className={index === displayedImage ? 'active' : ''} onClick={() => setGallerySelection({ productId: String(product.id), index })} aria-label={`Afficher la vue ${index + 1}`} aria-pressed={index === displayedImage} key={`${image}-${index}`}>
                   <img src={image} alt={`Vue ${index + 1}`} onError={imageFallback} />
                 </button>
               ))}
@@ -106,7 +109,7 @@ export default function ProductDetail() {
             {product.features?.map((feature) => <li key={feature}><Check size={16} /> {feature}</li>)}
           </ul>
           <div className="product-info__actions">
-            <button className="button button--accent" onClick={() => addToCart(product)} disabled={product.inStock === false}>
+            <button type="button" className="button button--accent" onClick={() => addToCart(product)} disabled={product.inStock === false}>
               <ShoppingBag size={18} /> {product.inStock === false ? 'Indisponible actuellement' : 'Ajouter à ma sélection'}
             </button>
             <a className="button button--outline" href={whatsappLink(settings.whatsapp, inquiry)} target="_blank" rel="noreferrer">
@@ -116,7 +119,7 @@ export default function ProductDetail() {
               <Heart size={18} fill={wished ? 'currentColor' : 'none'} /> {wished ? 'Retirer des favoris' : 'Ajouter aux favoris'}
             </button>
           </div>
-          {!product.inStock && <p className="stock-note">Disponible sur commande — contactez-nous pour le délai.</p>}
+          {product.inStock === false && <p className="stock-note">Disponible sur commande — contactez-nous pour le délai.</p>}
           <div className="product-assurance">
             <span><Wrench /> Installation possible à l’atelier</span>
             <span><ShieldCheck /> Produits contrôlés et garantis</span>

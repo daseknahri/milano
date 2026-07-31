@@ -11,7 +11,7 @@
     "build": "vite build",
     "check": "node --check server.cjs && node --check server/store.cjs && node --check server/auth.cjs",
     "lint": "eslint .",
-    "test": "vitest run",
+    "test": "npm run test:server",
     "test:server": "node --test server/backend.test.cjs"
   },
   "dependencies": {
