@@ -370,12 +370,14 @@ function Sidebar({ activeView, setActiveView, mobileOpen, setMobileOpen, onLogou
   return (
     <>
       <button
+        type="button"
         className={`sidebar-scrim ${mobileOpen ? 'is-open' : ''}`}
         onClick={() => setMobileOpen(false)}
         aria-label="Close navigation"
       />
       <aside
         ref={sidebarRef}
+        id="admin-navigation"
         className={`admin-sidebar ${mobileOpen ? 'is-open' : ''}`}
         aria-label="Admin navigation panel"
         aria-modal={mobileOpen ? 'true' : undefined}
@@ -387,7 +389,7 @@ function Sidebar({ activeView, setActiveView, mobileOpen, setMobileOpen, onLogou
             <strong>{brandName || 'Milan Auto'}</strong>
             <span>Administration</span>
           </div>
-          <button className="mobile-close" onClick={() => setMobileOpen(false)} aria-label="Close menu">
+          <button type="button" className="mobile-close" onClick={() => setMobileOpen(false)} aria-label="Close menu">
             <X size={20} />
           </button>
         </div>
@@ -1292,7 +1294,7 @@ export default function AdminApp() {
         ) : (
           <div className="admin-page">
             <div className="mobile-topbar">
-              <button onClick={() => setMobileOpen(true)} aria-label="Open menu"><Menu size={21} /></button>
+              <button type="button" onClick={() => setMobileOpen(true)} aria-label="Open menu" aria-expanded={mobileOpen} aria-controls="admin-navigation"><Menu size={21} /></button>
               <strong>{content.settings.shortName || 'Milan Auto'}</strong>
               <a href="/" target="_blank" rel="noreferrer" aria-label="View storefront"><Eye size={19} /></a>
             </div>
