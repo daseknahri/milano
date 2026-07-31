@@ -81,6 +81,7 @@ function sanitizeSettings(input = {}, previous = {}) {
     whatsapp: cleanText(merged.whatsapp, 40),
     email: cleanText(merged.email, 180),
     instagram: cleanUrl(merged.instagram, 300),
+    youtube: cleanUrl(merged.youtube, 300),
     mapUrl: cleanUrl(merged.mapUrl),
     hours: cleanText(merged.hours, 240),
     currency: cleanText(merged.currency, 8) || 'MAD',

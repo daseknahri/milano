@@ -20,9 +20,9 @@ export default function Header() {
   const { overlayRef, triggerRef } = useOverlayDialog(menuOpen, () => setMenuOpen(false))
   return (
     <>
-      <div className="announcement">{settings.announcement}</div>
+      {settings.announcement && <div className="announcement">{settings.announcement}</div>}
       <div className="top-service-bar">
-        <span>Besoin d aide ? Appelez-nous : {settings.phone}</span>
+        <span>{settings.phone ? `Besoin d aide ? Appelez-nous : ${settings.phone}` : 'Conseil et installation sur mesure'}</span>
         <nav aria-label="Liens rapides">
           <Link to="/atelier">A propos</Link>
           <Link to="/admin">Mon compte</Link>
@@ -83,7 +83,7 @@ export default function Header() {
               <Link to="/wishlist" onClick={() => setMenuOpen(false)}><Heart size={17} /> Liste des souhaits {wishlistCount > 0 && <span>{wishlistCount}</span>}</Link>
               <Link to="/admin" onClick={() => setMenuOpen(false)}><UserRound size={17} /> Mon compte</Link>
             </div>
-            <p>{settings.address}<br />{settings.hours}</p>
+            <p>{settings.address || settings.city || 'Tanger, Maroc'}<br />{settings.hours || 'Sur rendez-vous'}</p>
           </motion.div>
         )}
       </AnimatePresence>, document.body)}

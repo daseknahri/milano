@@ -20,6 +20,7 @@ export const fallbackContent = {
     city: 'Tanger',
     hours: 'Lundi - Samedi : 9:00 - 18:00',
     instagram: 'https://www.instagram.com/milanautomobileaccessoires',
+    youtube: '',
     mapUrl: 'https://maps.google.com/?q=Tanger%2C%20Maroc',
     aboutTitle: 'Specialistes des accessoires automobile.',
     aboutText:

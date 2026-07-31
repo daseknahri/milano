@@ -38,6 +38,8 @@ export default function Home() {
   const popular = products.filter((product) => ['VOLKSWAGEN', 'AUDI'].includes(product.brand)).slice(0, 6)
   const special = weekly[0] || featured[0] || products[0]
   const heroHref = normalizeHeroHref(settings.heroCtaHref)
+  const videoUrl = settings.youtube || settings.instagram
+  const videoLabel = settings.youtube ? 'Voir la chaine' : 'Voir les nouveautes'
   const finderParams = createSearchParams(Object.fromEntries(
     Object.entries(finder).filter(([, value]) => value),
   )).toString()
@@ -152,7 +154,7 @@ export default function Home() {
           <span className="eyebrow">Notre chaine YouTube</span>
           <h2>Premiere chaine marocaine dediee au test drive et aux upgrades auto.</h2>
         </div>
-        <a className="play-button" href={settings.instagram} target="_blank" rel="noreferrer"><Play size={20} /> Voir les nouveautes</a>
+        {videoUrl ? <a className="play-button" href={videoUrl} target="_blank" rel="noreferrer"><Play size={20} /> {videoLabel}</a> : <Link className="play-button" to="/catalogue"><Play size={20} /> Decouvrir la boutique</Link>}
       </section>
 
       <section className="shop-section">
@@ -171,7 +173,7 @@ export default function Home() {
       <section className="social-follow">
         <span className="eyebrow eyebrow--light">Suivez-nous sur les reseaux sociaux</span>
         <h2>@milanautomobileaccessoires</h2>
-        <a className="button button--accent" href={settings.instagram} target="_blank" rel="noreferrer">Voir Instagram <ArrowUpRight size={18} /></a>
+        {settings.instagram ? <a className="button button--accent" href={settings.instagram} target="_blank" rel="noreferrer">Voir Instagram <ArrowUpRight size={18} /></a> : <Link className="button button--accent" to="/contact">Nous contacter <ArrowUpRight size={18} /></Link>}
         <div className="conversion__note"><CheckCircle2 size={16} /> Nouveaux produits, installations et arrivages</div>
       </section>
     </main>

@@ -56,6 +56,7 @@ const EMPTY_SETTINGS = {
   city: '',
   hours: '',
   instagram: '',
+  youtube: '',
   mapUrl: '',
   aboutTitle: '',
   aboutText: '',
@@ -596,6 +597,9 @@ function SettingsView({ settings, onSaved, notify }) {
       <FormSection index="04" title="Social presence" description="Connect the catalogue to the social profile customers already know.">
         <Field label="Instagram URL" wide>
           <div className="input-with-icon"><Instagram size={17} /><input type="url" value={form.instagram} onChange={(e) => change('instagram', e.target.value)} /></div>
+        </Field>
+        <Field label="YouTube URL" wide hint="Used for the video and channel call-to-actions on the storefront.">
+          <input type="url" value={form.youtube} onChange={(e) => change('youtube', e.target.value)} placeholder="https://youtube.com/@your-channel" />
         </Field>
       </FormSection>
 
