@@ -37,6 +37,7 @@ export default function Home() {
     .slice(0, 4)
   const popular = products.filter((product) => ['VOLKSWAGEN', 'AUDI'].includes(product.brand)).slice(0, 6)
   const special = weekly[0] || featured[0] || products[0]
+  const heroHref = normalizeHeroHref(settings.heroCtaHref)
   const finderParams = createSearchParams(Object.fromEntries(
     Object.entries(finder).filter(([, value]) => value),
   )).toString()
@@ -74,11 +75,11 @@ export default function Home() {
           animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.08, delayChildren: 0.12 } } }}
         >
-          <motion.span className="hero__overline" variants={heroItem}>Milan Auto Accessoires</motion.span>
-          <motion.h1 variants={heroItem}>Trouvez vos produits rapidement</motion.h1>
-          <motion.p variants={heroItem}>Chercher les produits et accessoires de votre voiture pour ameliorer le confort, le style et la technologie de voyage.</motion.p>
+          <motion.span className="hero__overline" variants={heroItem}>{settings.eyebrow || 'Milan Auto Accessoires'}</motion.span>
+          <motion.h1 variants={heroItem}>{settings.heroTitle || 'Trouvez vos produits rapidement'}</motion.h1>
+          <motion.p variants={heroItem}>{settings.heroSubtitle || 'Chercher les produits et accessoires de votre voiture pour ameliorer le confort, le style et la technologie de voyage.'}</motion.p>
           <motion.div className="hero__actions" variants={heroItem}>
-            <Link className="button button--accent" to="/catalogue">Boutique <ArrowRight size={18} /></Link>
+            <HeroAction href={heroHref} label={settings.heroCtaLabel || 'Boutique'} />
             <a className="button button--glass" href={whatsappLink(settings.whatsapp, 'Bonjour Milan, je cherche un accessoire compatible avec ma voiture.')} target="_blank" rel="noreferrer">
               Besoin d aide
             </a>
@@ -212,6 +213,22 @@ function ProductFinder({ finder, models, setFinder, target }) {
       <button type="submit" className="button button--accent">Chercher votre produit</button>
     </motion.form>
   )
+}
+
+function HeroAction({ href, label }) {
+  const content = <>{label} <ArrowRight size={18} /></>
+  if (/^https?:\/\//i.test(href)) {
+    return <a className="button button--accent" href={href} target="_blank" rel="noreferrer">{content}</a>
+  }
+  return <Link className="button button--accent" to={href}>{content}</Link>
+}
+
+function normalizeHeroHref(value) {
+  const href = String(value || '').trim()
+  if (href === '#collections') return '#categories'
+  if (href.startsWith('#') || (href.startsWith('/') && !href.startsWith('//'))) return href
+  if (/^https?:\/\//i.test(href)) return href
+  return '/catalogue'
 }
 
 function SectionHead({ eyebrow, title, action, to, light = false }) {

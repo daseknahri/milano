@@ -41,10 +41,13 @@ const NAV_ITEMS = [
 const EMPTY_SETTINGS = {
   brandName: '',
   shortName: '',
+  eyebrow: '',
   announcement: '',
   heroTitle: '',
   heroSubtitle: '',
   heroImage: '',
+  heroCtaLabel: '',
+  heroCtaHref: '',
   phone: '',
   whatsapp: '',
   address: '',
@@ -565,8 +568,11 @@ function SettingsView({ settings, onSaved, notify }) {
       </FormSection>
 
       <FormSection index="02" title="Homepage hero" description="Keep the headline concise and pair it with a strong automotive image.">
+        <Field label="Eyebrow" hint="Small line above the hero title."><input value={form.eyebrow} onChange={(e) => change('eyebrow', e.target.value)} /></Field>
         <Field label="Hero title" required wide><input value={form.heroTitle} onChange={(e) => change('heroTitle', e.target.value)} required /></Field>
         <Field label="Hero subtitle" wide><textarea rows="3" value={form.heroSubtitle} onChange={(e) => change('heroSubtitle', e.target.value)} /></Field>
+        <Field label="Hero CTA label"><input value={form.heroCtaLabel} onChange={(e) => change('heroCtaLabel', e.target.value)} placeholder="Découvrir la collection" /></Field>
+        <Field label="Hero CTA destination" hint="Use /catalogue, #categories, or a full https:// URL."><input value={form.heroCtaHref} onChange={(e) => change('heroCtaHref', e.target.value)} placeholder="/catalogue" /></Field>
         <UploadField label="Hero image" value={form.heroImage} onChange={(value) => change('heroImage', value)} onStatus={notify} wide />
       </FormSection>
 

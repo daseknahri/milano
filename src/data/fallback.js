@@ -4,11 +4,14 @@ export const fallbackContent = {
   settings: {
     brandName: 'Milan Automobile Accessoires',
     shortName: 'MILAN',
+    eyebrow: 'Milan Auto Accessoires',
     announcement: 'Besoin d aide ? Appelez-nous : +212 664 575 655 - Livraison partout au Maroc',
     heroTitle: 'Accessoires automobile premium au Maroc.',
     heroSubtitle:
       'Trouvez rapidement les pieces, accessoires et upgrades compatibles avec votre voiture : Volkswagen, Audi, BMW, Mercedes, Range Rover, CarPlay, jantes et finitions.',
     heroImage: '/assets/hero-milan-night.webp',
+    heroCtaLabel: 'Découvrir la collection',
+    heroCtaHref: '#categories',
     phone: '+212 664 575 655',
     whatsapp: '212664575655',
     address: 'Tanger, Maroc',
