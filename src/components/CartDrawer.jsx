@@ -11,11 +11,14 @@ export default function CartDrawer() {
   const { overlayRef } = useOverlayDialog(cartOpen, () => setCartOpen(false))
   const total = cart.reduce((sum, item) => sum + Number(item.price || 0) * item.quantity, 0)
   const hasQuoteItems = cart.some((item) => !Number(item.price))
+  const hasPricedItems = cart.some((item) => Number(item.price) > 0)
   const hasUnavailableItems = cart.some((item) => item.inStock === false)
   const orderText = [
     'Bonjour Milan Automobile Accessoires, je souhaite commander :',
     ...cart.map((item) => `• ${item.name} × ${item.quantity} — ${Number(item.price) ? formatPrice(item.price * item.quantity) : productPriceLabel(item)}`),
-    hasQuoteItems ? `Sous-total des articles tarifés : ${formatPrice(total)}` : `Total indicatif : ${formatPrice(total)}`,
+    hasQuoteItems
+      ? (hasPricedItems ? `Sous-total des articles tarifés : ${formatPrice(total)}` : 'Tarification : à confirmer')
+      : `Total indicatif : ${formatPrice(total)}`,
     'Pouvez-vous me confirmer la disponibilité et l’installation ?',
   ].join('\n')
 
