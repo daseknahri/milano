@@ -14,7 +14,7 @@ export default function Footer() {
       <div className="footer-main footer-main--shop">
         <div className="footer-brand">
           <Logo light />
-          <p>Specialistes des accessoires automobile, pieces de carrosserie, activation CarPlay et lumiere d ambiance.</p>
+          <p>{settings.footerText || 'Specialistes des accessoires automobile, pieces de carrosserie, activation CarPlay et lumiere d ambiance.'}</p>
           <div className="footer-help">
             <span>Avez-vous besoin d aide ?</span>
             <a href={`tel:${settings.phone.replace(/\s/g, '')}`}>{settings.phone}</a>

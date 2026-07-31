@@ -43,19 +43,23 @@ export default function Home() {
   )).toString()
   const finderTarget = finderParams ? `/catalogue?${finderParams}` : '/catalogue'
 
-  useSeo('Accessoires auto premium au Maroc', settings.heroSubtitle, {
-    image: settings.heroImage,
-    schema: {
-      '@context': 'https://schema.org',
-      '@type': 'AutomotiveBusiness',
-      name: settings.brandName || 'Milan Automobile Accessoires',
+  useSeo(
+    settings.seoTitle || 'Accessoires auto premium au Maroc',
+    settings.seoDescription || settings.heroSubtitle,
+    {
       image: settings.heroImage,
-      telephone: settings.phone,
-      address: settings.address,
-      url: window.location.origin,
-      sameAs: settings.instagram ? [settings.instagram] : [],
+      schema: {
+        '@context': 'https://schema.org',
+        '@type': 'AutomotiveBusiness',
+        name: settings.brandName || 'Milan Automobile Accessoires',
+        image: settings.heroImage,
+        telephone: settings.phone,
+        address: settings.address,
+        url: window.location.origin,
+        sameAs: settings.instagram ? [settings.instagram] : [],
+      },
     },
-  })
+  )
 
   return (
     <main>

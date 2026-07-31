@@ -50,13 +50,18 @@ const EMPTY_SETTINGS = {
   heroCtaHref: '',
   phone: '',
   whatsapp: '',
+  email: '',
   address: '',
+  city: '',
   hours: '',
   instagram: '',
   mapUrl: '',
   aboutTitle: '',
   aboutText: '',
   aboutImage: '',
+  footerText: '',
+  seoTitle: '',
+  seoDescription: '',
 }
 
 const EMPTY_CATEGORY = { name: '', description: '', image: '' }
@@ -577,6 +582,8 @@ function SettingsView({ settings, onSaved, notify }) {
       </FormSection>
 
       <FormSection index="03" title="Contact & location" description="Give customers a direct route to the store and your team.">
+        <Field label="Email"><input type="email" value={form.email} onChange={(e) => change('email', e.target.value)} placeholder="bonjour@example.com" /></Field>
+        <Field label="City"><input value={form.city} onChange={(e) => change('city', e.target.value)} placeholder="Tanger" /></Field>
         <Field label="Phone"><input value={form.phone} onChange={(e) => change('phone', e.target.value)} placeholder="+212 …" /></Field>
         <Field label="WhatsApp"><input value={form.whatsapp} onChange={(e) => change('whatsapp', e.target.value)} placeholder="+212 …" /></Field>
         <Field label="Address" wide><input value={form.address} onChange={(e) => change('address', e.target.value)} /></Field>
@@ -594,6 +601,12 @@ function SettingsView({ settings, onSaved, notify }) {
         <Field label="Section title" wide><input value={form.aboutTitle} onChange={(e) => change('aboutTitle', e.target.value)} /></Field>
         <Field label="Story" wide><textarea rows="6" value={form.aboutText} onChange={(e) => change('aboutText', e.target.value)} /></Field>
         <UploadField label="About image" value={form.aboutImage} onChange={(value) => change('aboutImage', value)} onStatus={notify} wide />
+      </FormSection>
+
+      <FormSection index="06" title="SEO & footer" description="Control the search preview and the final message customers see across the site.">
+        <Field label="Footer text" wide><textarea rows="3" value={form.footerText} onChange={(e) => change('footerText', e.target.value)} /></Field>
+        <Field label="SEO title" wide><input value={form.seoTitle} onChange={(e) => change('seoTitle', e.target.value)} placeholder="Milan Automobile Accessoires | Tanger" /></Field>
+        <Field label="SEO description" wide><textarea rows="3" value={form.seoDescription} onChange={(e) => change('seoDescription', e.target.value)} /></Field>
       </FormSection>
 
       <div className="mobile-save-bar">
