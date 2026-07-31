@@ -59,7 +59,7 @@ export default function Home() {
         telephone: settings.phone,
         address: settings.address,
         url: window.location.origin,
-        sameAs: settings.instagram ? [settings.instagram] : [],
+        sameAs: [settings.instagram, settings.youtube].filter(Boolean),
       },
     },
   )

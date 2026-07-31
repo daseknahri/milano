@@ -1,4 +1,4 @@
-import { ArrowUpRight, Instagram, Mail, MapPin, Phone } from 'lucide-react'
+import { ArrowUpRight, Instagram, Mail, MapPin, Phone, Youtube } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../context/store'
 import Logo from './Logo'
@@ -15,6 +15,7 @@ export default function Footer() {
       <div className="footer-social">
         <span>Suivez-nous sur les reseaux sociaux</span>
         {settings.instagram && <a href={settings.instagram} target="_blank" rel="noreferrer"><Instagram size={18} /> @milanautomobileaccessoires</a>}
+        {settings.youtube && <a href={settings.youtube} target="_blank" rel="noreferrer"><Youtube size={18} /> Notre chaine YouTube</a>}
       </div>
       <div className="footer-main footer-main--shop">
         <div className="footer-brand">
@@ -52,6 +53,7 @@ export default function Footer() {
           {settings.mapUrl && <a href={settings.mapUrl} target="_blank" rel="noreferrer"><MapPin size={15} /> {locationLabel}</a>}
           {settings.email && <a href={`mailto:${settings.email}`}><Mail size={15} /> Envoyez-nous un message</a>}
           {settings.instagram && <a href={settings.instagram} target="_blank" rel="noreferrer">Instagram <ArrowUpRight size={13} /></a>}
+          {settings.youtube && <a href={settings.youtube} target="_blank" rel="noreferrer">YouTube <ArrowUpRight size={13} /></a>}
         </div>
       </div>
       <div className="footer-bottom">

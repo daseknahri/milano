@@ -1,4 +1,4 @@
-import { ArrowUpRight, Clock, Instagram, Mail, MapPin, MessageCircle, Phone } from 'lucide-react'
+import { ArrowUpRight, Clock, Instagram, Mail, MapPin, MessageCircle, Phone, Youtube } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../context/store'
 import { useSeo } from '../hooks/useSeo'
@@ -37,6 +37,7 @@ export default function Contact() {
           <div><Clock /><span><small>Horaires</small>{settings.hours || 'Sur rendez-vous'}</span></div>
           {settings.email && <a href={`mailto:${settings.email}`}><Mail /><span><small>Email</small>{settings.email}</span><ArrowUpRight /></a>}
           {settings.instagram && <a href={settings.instagram} target="_blank" rel="noreferrer"><Instagram /><span><small>Instagram</small>@milanautomobileaccessoires</span><ArrowUpRight /></a>}
+          {settings.youtube && <a href={settings.youtube} target="_blank" rel="noreferrer"><Youtube /><span><small>YouTube</small>Notre chaine</span><ArrowUpRight /></a>}
         </div>
       </section>
       <section className="map-frame">
