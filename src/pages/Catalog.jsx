@@ -28,7 +28,7 @@ export default function Catalog() {
     return {
       brands: [...new Set(inCategory.map((product) => product.brand).filter(Boolean))].sort(),
       models: [...new Set(inBrand.flatMap((product) => product.vehicleModels || []))].sort(),
-      years: [...new Set(inModel.flatMap((product) => normalizeYears(product.years)))].sort(),
+      years: [...new Set(inModel.flatMap((product) => yearOptions(product.years)))].sort((a, b) => Number(b) - Number(a)),
     }
   }, [products, category, brand, model])
 
@@ -48,7 +48,7 @@ export default function Catalog() {
         && (!category || matchesCategory(product, category))
         && (!brand || product.brand === brand)
         && (!model || product.vehicleModels?.includes(model))
-        && (!year || normalizeYears(product.years).includes(year))
+        && (!year || matchesYear(product.years, year))
     })
     return filtered.sort((a, b) => compareProducts(a, b, sort))
   }, [products, query, category, brand, model, year, sort])
@@ -217,7 +217,27 @@ function priceValue(product) {
   return Number.isFinite(price) && price > 0 ? price : Number.POSITIVE_INFINITY
 }
 
+function matchesYear(value, selected) {
+  const target = Number(selected)
+  if (!Number.isFinite(target)) return true
+  const years = normalizeYears(value).map(Number).filter(Number.isFinite)
+  if (!years.length) return true
+  if (years.includes(target)) return true
+  const min = Math.min(...years)
+  const max = Math.max(...years)
+  return years.length > 1 && target >= min && target <= max
+}
+
+function yearOptions(value) {
+  const years = normalizeYears(value).map(Number).filter(Number.isFinite)
+  if (years.length < 2) return years.map(String)
+  const min = Math.min(...years)
+  const max = Math.max(...years)
+  if (max - min > 30) return years.map(String)
+  return Array.from({ length: max - min + 1 }, (_, index) => String(min + index))
+}
+
 function normalizeYears(value) {
-  if (Array.isArray(value)) return value.filter(Boolean)
-  return String(value || '').match(/\d{4}/g) || []
+  const source = Array.isArray(value) ? value : [value]
+  return source.filter(Boolean).flatMap((item) => String(item).match(/\d{4}/g) || [])
 }

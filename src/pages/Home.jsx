@@ -99,7 +99,7 @@ export default function Home() {
         <SectionHead eyebrow="Meilleures categories" title="Ne manquez pas les offres de cette semaine" action="Afficher tout" to="/catalogue" />
         <div className="best-category-grid">
           {topCategories.map((category) => (
-            <Link className="best-category" to={`/catalogue?categorie=${encodeURIComponent(category.name)}`} key={category.id}>
+            <Link className="best-category" to={`/catalogue?categorie=${encodeURIComponent(category.id)}`} key={category.id}>
               <img src={category.image} alt="" loading="lazy" onError={imageFallback} />
               <span>{category.name}</span>
               <small>{categoryMeta(category, products)}</small>

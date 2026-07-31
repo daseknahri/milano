@@ -39,7 +39,7 @@ export default function Footer() {
         </div>
         <div>
           <span className="footer-title">Category Menu</span>
-          {categories.slice(0, 8).map((category) => <Link key={category.id} to={`/catalogue?categorie=${encodeURIComponent(category.name)}`}>{category.name}</Link>)}
+          {categories.slice(0, 8).map((category) => <Link key={category.id} to={`/catalogue?categorie=${encodeURIComponent(category.id)}`}>{category.name}</Link>)}
         </div>
         <div className="footer-contact">
           <span className="footer-title">Contact</span>
