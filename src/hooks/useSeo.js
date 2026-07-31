@@ -16,7 +16,7 @@ export function useSeo(title, description, options = {}) {
   useEffect(() => {
     const fullTitle = `${title} — Milan Automobile Accessoires`
     const canonicalUrl = new URL(window.location.pathname, window.location.origin).href
-    const absoluteImage = image ? new URL(image, window.location.origin).href : ''
+    const absoluteImage = toAbsoluteUrl(image)
     document.title = fullTitle
 
     upsertMeta('meta[name="description"]', { name: 'description', content: description || '' })
@@ -51,4 +51,14 @@ export function useSeo(title, description, options = {}) {
       document.head.appendChild(script)
     }
   }, [title, description, image, noindex, schemaKey, type])
+}
+
+function toAbsoluteUrl(value) {
+  if (!value) return ''
+  try {
+    const parsed = new URL(value, window.location.origin)
+    return ['http:', 'https:'].includes(parsed.protocol) ? parsed.href : ''
+  } catch {
+    return ''
+  }
 }
