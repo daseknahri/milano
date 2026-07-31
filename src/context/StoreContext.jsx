@@ -11,12 +11,13 @@ const normalizeContent = (data) => {
   const savedCategories = Array.isArray(data?.categories)
     ? data.categories
     : fallbackContent.categories
-  const categories = [...savedCategories].sort((a, b) => (a.order || 0) - (b.order || 0))
+  const categories = savedCategories.filter((category) => category?.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0))
   const categoryNames = new Map(categories.map((category) => [category.id, category.name]))
   const savedProducts = Array.isArray(data?.products)
     ? data.products
     : fallbackContent.products
-  const products = [...savedProducts]
+  const activeCategoryIds = new Set(categories.map((category) => String(category.id)))
+  const products = savedProducts.filter((product) => product?.active !== false && activeCategoryIds.has(String(product.categoryId || product.category)))
 
   return {
     settings: { ...fallbackContent.settings, ...(data?.settings || {}) },

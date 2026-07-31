@@ -66,7 +66,7 @@ const EMPTY_SETTINGS = {
   seoDescription: '',
 }
 
-const EMPTY_CATEGORY = { name: '', description: '', image: '' }
+const EMPTY_CATEGORY = { name: '', description: '', image: '', active: true }
 
 const EMPTY_PRODUCT = {
   slug: '',
@@ -757,6 +757,9 @@ function CategoryEditor({ category, onClose, onSave, notify }) {
           <DrawerSection index="02" title="Cover image" description="Choose one strong image that represents this collection." single>
             <UploadField label="Category image" value={form.image} onChange={(value) => setForm({ ...form, image: value })} onStatus={notify} />
           </DrawerSection>
+          <DrawerSection index="03" title="Visibility" description="Hide a collection temporarily without deleting its content." single>
+            <Toggle checked={form.active !== false} onChange={(value) => setForm({ ...form, active: value })} label="Published category" description="Show this collection and its products in the storefront." />
+          </DrawerSection>
         </div>
         <div className="drawer-actions">
           <div className="drawer-actions__copy"><span>Category draft</span><small>Save to publish these changes.</small></div>
@@ -1026,6 +1029,7 @@ function ProductEditor({ product, categories, onClose, onSave, notify }) {
             <div className="toggle-row field-wide">
               <Toggle checked={form.featured} onChange={(value) => change('featured', value)} label="Featured product" description="Show this item in curated homepage areas." />
               <Toggle checked={form.inStock} onChange={(value) => change('inStock', value)} label="In stock" description="Allow customers to add this item to their selection." />
+              <Toggle checked={form.active !== false} onChange={(value) => change('active', value)} label="Published product" description="Show this item in the public catalogue." />
             </div>
           </DrawerSection>
         </div>
