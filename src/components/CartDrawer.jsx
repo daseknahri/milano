@@ -21,6 +21,7 @@ export default function CartDrawer() {
       : `Total indicatif : ${formatPrice(total)}`,
     'Pouvez-vous me confirmer la disponibilité et l’installation ?',
   ].join('\n')
+  const whatsappHref = whatsappLink(settings.whatsapp, orderText)
 
   return createPortal(
     <AnimatePresence>
@@ -74,11 +75,7 @@ export default function CartDrawer() {
                   <p>Disponibilité et compatibilité confirmées par notre équipe avant paiement.</p>
                   {hasUnavailableItems ? (
                     <button className="button button--accent" type="button" disabled>Retirez les articles indisponibles</button>
-                  ) : (
-                    <a className="button button--accent" href={whatsappLink(settings.whatsapp, orderText)} target="_blank" rel="noreferrer">
-                      Commander sur WhatsApp <ArrowUpRight size={18} />
-                    </a>
-                  )}
+                  ) : whatsappHref ? <a className="button button--accent" href={whatsappHref} target="_blank" rel="noreferrer">Commander sur WhatsApp <ArrowUpRight size={18} /></a> : <Link className="button button--accent" to="/contact" onClick={() => setCartOpen(false)}>Nous contacter pour commander <ArrowUpRight size={18} /></Link>}
                 </div>
               </>
             ) : (

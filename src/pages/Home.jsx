@@ -40,6 +40,7 @@ export default function Home() {
   const heroHref = normalizeHeroHref(settings.heroCtaHref)
   const videoUrl = settings.youtube || settings.instagram
   const videoLabel = settings.youtube ? 'Voir la chaine' : 'Voir les nouveautes'
+  const whatsappHref = whatsappLink(settings.whatsapp, 'Bonjour Milan, je cherche un accessoire compatible avec ma voiture.')
   const finderParams = createSearchParams(Object.fromEntries(
     Object.entries(finder).filter(([, value]) => value),
   )).toString()
@@ -86,9 +87,7 @@ export default function Home() {
           <motion.p variants={heroItem}>{settings.heroSubtitle || 'Chercher les produits et accessoires de votre voiture pour ameliorer le confort, le style et la technologie de voyage.'}</motion.p>
           <motion.div className="hero__actions" variants={heroItem}>
             <HeroAction href={heroHref} label={settings.heroCtaLabel || 'Boutique'} />
-            <a className="button button--glass" href={whatsappLink(settings.whatsapp, 'Bonjour Milan, je cherche un accessoire compatible avec ma voiture.')} target="_blank" rel="noreferrer">
-              Besoin d aide
-            </a>
+            {whatsappHref ? <a className="button button--glass" href={whatsappHref} target="_blank" rel="noreferrer">Besoin d aide</a> : <Link className="button button--glass" to="/contact">Besoin d aide</Link>}
           </motion.div>
         </motion.div>
         <ProductFinder finder={finder} models={models} setFinder={setFinder} target={finderTarget} />

@@ -6,6 +6,7 @@ import { imageFallback, whatsappLink } from '../utils'
 
 export default function Workshop() {
   const { settings } = useStore()
+  const whatsappHref = whatsappLink(settings.whatsapp, 'Bonjour Milan, je souhaite prendre rendez-vous à l’atelier.')
   useSeo('Notre atelier', 'Découvrez la méthode et le savoir-faire de Milan Automobile Accessoires à Tanger.')
   return (
     <main className="workshop-page">
@@ -42,9 +43,7 @@ export default function Workshop() {
           <h2>Votre projet mérite un œil expert.</h2>
           <p>Passez à l’atelier ou envoyez-nous une photo de votre voiture.</p>
         </div>
-        <a href={whatsappLink(settings.whatsapp, 'Bonjour Milan, je souhaite prendre rendez-vous à l’atelier.')} target="_blank" rel="noreferrer" className="button button--dark">
-          Prendre rendez-vous <ArrowUpRight size={18} />
-        </a>
+        {whatsappHref ? <a href={whatsappHref} target="_blank" rel="noreferrer" className="button button--dark">Prendre rendez-vous <ArrowUpRight size={18} /></a> : <Link to="/contact" className="button button--dark">Nous contacter <ArrowUpRight size={18} /></Link>}
       </section>
       <div className="center-link"><Link className="text-link" to="/catalogue">Découvrir les équipements <ArrowUpRight size={16} /></Link></div>
     </main>

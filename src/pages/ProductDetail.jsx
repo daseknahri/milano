@@ -54,6 +54,7 @@ export default function ProductDetail() {
     })
   }
   const inquiry = `Bonjour Milan, je souhaite vérifier la compatibilité de « ${product.name} » avec mon véhicule.`
+  const whatsappHref = whatsappLink(settings.whatsapp, inquiry)
 
   return (
     <main className="product-page">
@@ -112,9 +113,7 @@ export default function ProductDetail() {
             <button type="button" className="button button--accent" onClick={() => addToCart(product)} disabled={product.inStock === false}>
               <ShoppingBag size={18} /> {product.inStock === false ? 'Indisponible actuellement' : 'Ajouter à ma sélection'}
             </button>
-            <a className="button button--outline" href={whatsappLink(settings.whatsapp, inquiry)} target="_blank" rel="noreferrer">
-              <MessageCircle size={18} /> Vérifier la compatibilité
-            </a>
+            {whatsappHref ? <a className="button button--outline" href={whatsappHref} target="_blank" rel="noreferrer"><MessageCircle size={18} /> Vérifier la compatibilité</a> : <Link className="button button--outline" to="/contact"><MessageCircle size={18} /> Nous contacter</Link>}
             <button className={`button button--outline wishlist-action ${wished ? 'is-active' : ''}`} type="button" onClick={() => toggleWishlist(product)} aria-pressed={wished}>
               <Heart size={18} fill={wished ? 'currentColor' : 'none'} /> {wished ? 'Retirer des favoris' : 'Ajouter aux favoris'}
             </button>

@@ -1,4 +1,5 @@
 import { ArrowUpRight, Clock, Instagram, Mail, MapPin, MessageCircle, Phone } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useStore } from '../context/store'
 import { useSeo } from '../hooks/useSeo'
 import { whatsappLink } from '../utils'
@@ -11,6 +12,7 @@ export default function Contact() {
     .filter((value, index, values) => values.indexOf(value) === index)
     .join(', ') || 'Tanger, Maroc'
   const mapQuery = locationLabel || 'Tanger, Maroc'
+  const whatsappHref = whatsappLink(settings.whatsapp, 'Bonjour Milan, je souhaite un conseil pour mon véhicule.')
   useSeo('Contact & accès', `Contactez ou visitez Milan Automobile Accessoires à ${settings.city || 'Tanger'}.`)
   return (
     <main className="contact-page">
@@ -20,11 +22,15 @@ export default function Contact() {
         <p>Envoyez le modèle et l’année de votre véhicule. Nous vous répondons avec une recommandation claire.</p>
       </header>
       <section className="contact-grid">
-        <a className="contact-primary" href={whatsappLink(settings.whatsapp, 'Bonjour Milan, je souhaite un conseil pour mon véhicule.')} target="_blank" rel="noreferrer">
+        {whatsappHref ? <a className="contact-primary" href={whatsappHref} target="_blank" rel="noreferrer">
           <MessageCircle />
           <div><span>WhatsApp</span><h2>Démarrer une conversation</h2><p>Le moyen le plus rapide pour vérifier un produit ou demander un devis.</p></div>
           <ArrowUpRight />
-        </a>
+        </a> : <Link className="contact-primary" to="/catalogue">
+          <MessageCircle />
+          <div><span>Catalogue</span><h2>Découvrir les accessoires</h2><p>Parcourez la sélection et contactez-nous pour vérifier la compatibilité.</p></div>
+          <ArrowUpRight />
+        </Link>}
         <div className="contact-details">
           {phoneHref && <a href={phoneHref}><Phone /><span><small>Téléphone</small>{settings.phone}</span><ArrowUpRight /></a>}
           {settings.mapUrl && <a href={settings.mapUrl} target="_blank" rel="noreferrer"><MapPin /><span><small>Adresse</small>{locationLabel}</span><ArrowUpRight /></a>}

@@ -15,6 +15,7 @@ export function productPriceLabel(product) {
 
 export function whatsappLink(number, message) {
   const clean = String(number || '').replace(/\D/g, '')
+  if (!clean) return ''
   return `https://wa.me/${clean}?text=${encodeURIComponent(message)}`
 }
 
