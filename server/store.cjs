@@ -9,6 +9,21 @@ const BACKUP_FILE = path.join(STORAGE_DIR, 'content.backup.json');
 const SEED_FILE = path.join(__dirname, 'data', 'content.seed.json');
 const LEGACY_CATEGORY_IDS = new Set(['ambient-led', 'transformation-kits', 'star-ceiling', 'interior-comfort', 'exterior-style']);
 const CARL_CATEGORY_IDS = new Set(['volkswagen', 'bmw', 'mercedes', 'audi', 'range-rover', 'carplay', 'jantes', 'accessoires']);
+const CARL_REFERENCE_VERSION = 'carl-reference-v2';
+const PREVIOUS_CARL_PRODUCT_IDS = new Set([
+  'mib2-fibre-volkswagen',
+  'coffre-electrique-touareg-2019',
+  'marchepied-electrique-touareg',
+  'jantes-19-volkswagen',
+  'camera-recul-audi-a5',
+  'calandre-rs5-audi-a5',
+  'calandre-rsq5-audi-q5',
+  'feux-arriere-led-golf-75',
+  'kit-gtd-golf-8',
+  'parechoc-golf-7-gti',
+  'jante-range-rover-evoque-20',
+  'jante-audi-22',
+]);
 
 let writeQueue = Promise.resolve();
 
@@ -163,6 +178,7 @@ function sanitizeContent(input = {}) {
     : [];
   return {
     version: 1,
+    catalogueVersion: cleanText(input.catalogueVersion, 40),
     updatedAt: cleanText(input.updatedAt, 40) || new Date().toISOString(),
     settings: sanitizeSettings(input.settings),
     categories,
@@ -193,17 +209,23 @@ async function migrateLegacyCatalogue() {
   const isLegacyOnly = categoryIds.length > 0
     && categoryIds.every((id) => LEGACY_CATEGORY_IDS.has(id))
     && !categoryIds.some((id) => CARL_CATEGORY_IDS.has(id));
-  if (!isLegacyOnly) return;
+  const currentProductIds = new Set(Array.isArray(current.products) ? current.products.map((product) => String(product?.id || '')) : []);
+  const isPreviousCarlReference = categoryIds.some((id) => CARL_CATEGORY_IDS.has(id))
+    && current.catalogueVersion !== CARL_REFERENCE_VERSION
+    && currentProductIds.size === PREVIOUS_CARL_PRODUCT_IDS.size
+    && [...currentProductIds].every((id) => PREVIOUS_CARL_PRODUCT_IDS.has(id));
+  if (!isLegacyOnly && !isPreviousCarlReference) return;
   try {
     const reference = await import(pathToFileURL(path.join(__dirname, '..', 'src', 'data', 'referenceShop.js')).href);
     const migrated = sanitizeContent({
       ...current,
+      catalogueVersion: CARL_REFERENCE_VERSION,
       categories: reference.referenceCategories,
       products: reference.referenceProducts,
       updatedAt: new Date().toISOString(),
     });
     await atomicWrite(migrated);
-    console.info(`Migrated legacy catalogue to the Carl-style reference catalogue (${migrated.products.length} products).`);
+    console.info(`Migrated catalogue to the Carl-style reference catalogue (${migrated.products.length} products).`);
   } catch (error) {
     console.error(`Legacy catalogue migration skipped: ${error.message}`);
   }

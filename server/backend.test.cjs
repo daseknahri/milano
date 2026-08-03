@@ -43,6 +43,7 @@ test('health and seeded public content are available', async () => {
   const content = await response.json();
   assert.equal(response.status, 200);
   assert.equal(content.settings.city, 'Tanger');
+  assert.equal(content.catalogueVersion, 'carl-reference-v2');
   assert.ok(content.categories.some((category) => category.id === 'volkswagen'));
   assert.ok(content.products.some((product) => product.slug === 'poste-mib2-2-carte-fibre'));
   assert.equal(content.settings.shortName, 'Milan Auto');
