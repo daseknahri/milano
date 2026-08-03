@@ -90,7 +90,7 @@ export const referencePartners = ['AUDI', 'VOLKSWAGEN', 'BMW', 'MERCEDES', 'RANG
 
 export const finderMakes = {
   AUDI: ['A3', 'A4', 'A5', 'Q5', 'Q7'],
-  VOLKSWAGEN: ['Golf 6', 'Golf 7', 'Golf 8', 'Tiguan', 'Touareg'],
+  VOLKSWAGEN: ['Golf 6', 'Golf 7', 'Golf 7.5', 'Golf 8', 'Tiguan', 'Touareg'],
   BMW: ['Serie 3', 'Serie 5', 'X3', 'X5'],
   MERCEDES: ['Classe A', 'Classe C', 'GLA', 'GLC'],
   'RANGE ROVER': ['Evoque', 'Sport', 'Velar', 'Vogue'],

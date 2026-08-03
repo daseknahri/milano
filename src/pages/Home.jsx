@@ -20,7 +20,8 @@ import { finderMakes, referenceBrands, referencePartners } from '../data/referen
 import { useSeo } from '../hooks/useSeo'
 import { imageFallback, whatsappLink } from '../utils'
 
-const years = ['2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018']
+// Keep the finder aligned with the catalogue's oldest supported fitments.
+const years = Array.from({ length: 13 }, (_, index) => String(2025 - index))
 
 export default function Home() {
   const { settings, categories, products } = useStore()
