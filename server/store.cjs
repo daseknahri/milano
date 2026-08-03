@@ -1,11 +1,14 @@
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const { pathToFileURL } = require('node:url');
 
 const STORAGE_DIR = path.resolve(process.env.STORAGE_DIR || path.join(process.cwd(), 'storage'));
 const DATA_FILE = path.join(STORAGE_DIR, 'content.json');
 const BACKUP_FILE = path.join(STORAGE_DIR, 'content.backup.json');
 const SEED_FILE = path.join(__dirname, 'data', 'content.seed.json');
+const LEGACY_CATEGORY_IDS = new Set(['ambient-led', 'transformation-kits', 'star-ceiling', 'interior-comfort', 'exterior-style']);
+const CARL_CATEGORY_IDS = new Set(['volkswagen', 'bmw', 'mercedes', 'audi', 'range-rover', 'carplay', 'jantes', 'accessoires']);
 
 let writeQueue = Promise.resolve();
 
@@ -175,6 +178,34 @@ async function ensureStorage() {
   } catch {
     const seed = sanitizeContent(JSON.parse(await fs.readFile(SEED_FILE, 'utf8')));
     await atomicWrite(seed);
+  }
+  await migrateLegacyCatalogue();
+}
+
+async function migrateLegacyCatalogue() {
+  let current;
+  try {
+    current = JSON.parse(await fs.readFile(DATA_FILE, 'utf8'));
+  } catch {
+    return;
+  }
+  const categoryIds = Array.isArray(current.categories) ? current.categories.map((category) => String(category?.id || '')) : [];
+  const isLegacyOnly = categoryIds.length > 0
+    && categoryIds.every((id) => LEGACY_CATEGORY_IDS.has(id))
+    && !categoryIds.some((id) => CARL_CATEGORY_IDS.has(id));
+  if (!isLegacyOnly) return;
+  try {
+    const reference = await import(pathToFileURL(path.join(__dirname, '..', 'src', 'data', 'referenceShop.js')).href);
+    const migrated = sanitizeContent({
+      ...current,
+      categories: reference.referenceCategories,
+      products: reference.referenceProducts,
+      updatedAt: new Date().toISOString(),
+    });
+    await atomicWrite(migrated);
+    console.info(`Migrated legacy catalogue to the Carl-style reference catalogue (${migrated.products.length} products).`);
+  } catch (error) {
+    console.error(`Legacy catalogue migration skipped: ${error.message}`);
   }
 }
 

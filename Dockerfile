@@ -16,6 +16,7 @@ COPY --from=build --chown=node:node /app/package.json /app/package-lock.json ./
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/server.cjs ./
 COPY --from=build --chown=node:node /app/server ./server
+COPY --from=build --chown=node:node /app/src/data/referenceShop.js ./src/data/referenceShop.js
 COPY --from=build --chown=node:node /app/dist ./dist
 RUN mkdir -p /app/storage/uploads && chown -R node:node /app/storage
 USER node
