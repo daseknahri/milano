@@ -141,8 +141,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .best-category small { margin-top: .35rem; color: #d8c39c; font-size: .68rem; }
 .brand-shelf { padding: clamp(4.5rem, 8vw, 8rem) var(--gutter); background: #090a09; color: white; }
 .brand-tabs { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 2rem; }
-.brand-tabs a { min-height: 42px; display: inline-flex; align-items: center; border: 1px solid rgba(255,255,255,.14); padding: 0 1rem; color: #d5d0c6; font-size: .72rem; font-weight: 700; letter-spacing: .11em; }
+.brand-tabs a { min-height: 42px; display: inline-flex; align-items: center; gap: .55rem; border: 1px solid rgba(255,255,255,.14); padding: 0 1rem; color: #d5d0c6; font-size: .72rem; font-weight: 700; letter-spacing: .11em; }
+.brand-tabs a small { color: rgba(213,208,198,.58); font-size: .56rem; font-weight: 700; letter-spacing: .04em; }
 .brand-tabs a:hover { border-color: var(--accent); color: white; background: rgba(197,160,103,.12); }
+.brand-tabs a:hover small { color: var(--accent-bright); }
 .brand-shelf .product-card__body p, .brand-shelf .product-price del { color: #8f8b84; }
 .brand-shelf .product-card__body h3, .brand-shelf .product-price strong { color: white; }
 .brand-shelf .quick-add { border-color: rgba(255,255,255,.16); color: white; }

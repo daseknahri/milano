@@ -118,7 +118,10 @@ export default function Home() {
       <section className="brand-shelf">
         <SectionHead eyebrow="Groupe par marque" title="Choisissez votre univers automobile" action="Afficher tout" to="/catalogue" light />
         <div className="brand-tabs">
-          {referenceBrands.map((brand) => <Link key={brand} to={`/catalogue?marque=${encodeURIComponent(brand)}`}>{brand}</Link>)}
+          {referenceBrands.map((brand) => {
+            const count = products.filter((product) => product.brand === brand).length
+            return <Link key={brand} to={`/catalogue?marque=${encodeURIComponent(brand)}`}><span>{brand}</span><small>{count}</small></Link>
+          })}
         </div>
         <div className="product-grid product-grid--shop">
           {(popular.length ? popular : products).slice(0, 8).map((product, index) => <ProductCard key={product.id} product={product} priority={index < 2} />)}
