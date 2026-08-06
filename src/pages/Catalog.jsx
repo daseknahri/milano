@@ -98,7 +98,7 @@ export default function Catalog() {
           onClick={() => setFilter('categorie', '')}
           aria-current={!category ? 'page' : undefined}
         >
-          Toutes les categories
+          Toutes les categories <small>{products.length}</small>
         </button>
         {categories.slice(0, 8).map((item) => (
           <button
@@ -108,7 +108,7 @@ export default function Catalog() {
             onClick={() => setFilter('categorie', category === item.id || category === item.name ? '' : item.id)}
             aria-current={category === item.id || category === item.name ? 'page' : undefined}
           >
-            {item.name}
+            {item.name} <small>{products.filter((product) => matchesCategory(product, item.id)).length}</small>
           </button>
         ))}
       </nav>
