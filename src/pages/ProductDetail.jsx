@@ -10,7 +10,7 @@ import NotFound from './NotFound'
 
 export default function ProductDetail() {
   const { slug } = useParams()
-  const { products, addToCart, settings, loading, toggleWishlist, isWishlisted } = useStore()
+  const { products, categories, addToCart, settings, loading, toggleWishlist, isWishlisted } = useStore()
   const product = products.find((item) => item.slug === slug || String(item.id) === slug)
   const [gallerySelection, setGallerySelection] = useState({ productId: '', index: 0 })
   useSeo(product?.name || 'Produit', product?.description || 'Accessoire automobile Milan.', {
@@ -37,6 +37,7 @@ export default function ProductDetail() {
   if (loading && !product) return <PageLoader />
   if (!product) return <NotFound compact />
   const gallery = product.gallery?.length ? product.gallery : [product.image]
+  const categoryLabel = categories.find((item) => item.id === product.categoryId || item.name === product.category)?.name || product.category
   const vehicleModels = asList(product.vehicleModels)
   const years = asList(product.years)
   const activeImage = gallerySelection.productId === String(product.id) ? gallerySelection.index : 0
@@ -58,7 +59,7 @@ export default function ProductDetail() {
 
   return (
     <main className="product-page">
-      <div className="breadcrumb"><Link to="/catalogue"><ArrowLeft size={15} /> Catalogue</Link><span>/</span><span>{product.category}</span></div>
+      <div className="breadcrumb"><Link to="/catalogue"><ArrowLeft size={15} /> Catalogue</Link><span>/</span><span>{categoryLabel}</span></div>
       <section className="product-detail">
         <div className="product-gallery">
           <div className="product-gallery__main">
@@ -83,7 +84,7 @@ export default function ProductDetail() {
           )}
         </div>
         <div className="product-info">
-          <span className="eyebrow">{product.category} · {product.brand}</span>
+          <span className="eyebrow">{categoryLabel} · {product.brand}</span>
           <h1>{product.name}</h1>
           <div className="product-info__price">
             <strong>{productPriceLabel(product)}</strong>
