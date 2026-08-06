@@ -135,6 +135,15 @@ export default function ProductDetail() {
           <div className="featured-products">{related.map((item) => <ProductCard product={item} key={item.id} />)}</div>
         </section>
       )}
+      <div className="mobile-product-bar" aria-label="Action produit">
+        <div>
+          <small>{product.inStock === false ? 'Sur commande' : 'Disponible'}</small>
+          <strong>{productPriceLabel(product)}</strong>
+        </div>
+        {product.inStock === false
+          ? (whatsappHref ? <a className="button button--accent" href={whatsappHref} target="_blank" rel="noreferrer"><MessageCircle size={17} /> Vérifier</a> : <Link className="button button--accent" to="/contact"><MessageCircle size={17} /> Contacter</Link>)
+          : <button type="button" className="button button--accent" onClick={() => addToCart(product)}><ShoppingBag size={17} /> Ajouter</button>}
+      </div>
     </main>
   )
 }

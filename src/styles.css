@@ -339,6 +339,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .product-assurance span { display: flex; gap: .4rem; align-items: center; }
 .product-assurance svg { width: 15px; }
 .related { border-top: 1px solid var(--line); }
+.mobile-product-bar { display: none; }
 
 .wishlist-heading { background: var(--paper); }
 .wishlist-results { padding-top: clamp(2rem, 5vw, 4rem); }
@@ -492,6 +493,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .product-detail { grid-template-columns: 1fr; }
   .product-gallery__main { height: 110vw; min-height: 440px; max-height: 650px; }
   .product-info { max-width: none; }
+  .product-page { padding-bottom: 86px; }
+  .mobile-product-bar { position: fixed; z-index: 45; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem var(--gutter) max(.7rem, env(safe-area-inset-bottom)); border-top: 1px solid rgba(197,160,103,.34); background: rgba(17,17,15,.96); color: white; box-shadow: 0 -16px 35px rgba(0,0,0,.2); backdrop-filter: blur(14px); }
+  .mobile-product-bar > div { display: grid; min-width: 0; gap: .2rem; }
+  .mobile-product-bar small { color: #b8b2a8; font-size: .55rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+  .mobile-product-bar strong { overflow: hidden; color: white; font: 600 1rem var(--display); text-overflow: ellipsis; white-space: nowrap; }
+  .mobile-product-bar .button { min-height: 46px; flex: 0 0 auto; padding-inline: .9rem; }
   .atelier-story { grid-template-columns: 1fr; }
   .visit-strip { grid-template-columns: 1fr; gap: 1.5rem; }
   .contact-grid { grid-template-columns: 1fr; }
