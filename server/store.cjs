@@ -9,7 +9,7 @@ const BACKUP_FILE = path.join(STORAGE_DIR, 'content.backup.json');
 const SEED_FILE = path.join(__dirname, 'data', 'content.seed.json');
 const LEGACY_CATEGORY_IDS = new Set(['ambient-led', 'transformation-kits', 'star-ceiling', 'interior-comfort', 'exterior-style']);
 const CARL_CATEGORY_IDS = new Set(['volkswagen', 'bmw', 'mercedes', 'audi', 'range-rover', 'carplay', 'jantes', 'accessoires']);
-const CARL_REFERENCE_VERSION = 'carl-reference-v2';
+const CARL_REFERENCE_VERSION = 'carl-reference-v3';
 const PREVIOUS_CARL_PRODUCT_IDS = new Set([
   'mib2-fibre-volkswagen',
   'coffre-electrique-touareg-2019',
@@ -21,7 +21,16 @@ const PREVIOUS_CARL_PRODUCT_IDS = new Set([
   'feux-arriere-led-golf-75',
   'kit-gtd-golf-8',
   'parechoc-golf-7-gti',
+  'kit-touareg-r-line',
+  'kit-tiguan-r-line',
+  'optiques-golf-6-look-75',
+  'kit-gti-75-golf-7',
+  'feux-tiguan-iq-2017',
+  'feux-golf-8-iq-lights',
+  'feux-golf-6-dynamique',
+  'kit-golf-8-r-line',
   'jante-range-rover-evoque-20',
+  'bas-caisse-golf-7-gtd',
   'jante-audi-22',
 ]);
 
