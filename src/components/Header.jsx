@@ -15,7 +15,7 @@ const links = [
 ]
 
 export default function Header() {
-  const { settings, cartCount, wishlistCount, setCartOpen } = useStore()
+  const { settings, categories, cartCount, wishlistCount, setCartOpen } = useStore()
   const [menuOpen, setMenuOpen] = useState(false)
   const { overlayRef, triggerRef } = useOverlayDialog(menuOpen, () => setMenuOpen(false))
   return (
@@ -79,6 +79,16 @@ export default function Header() {
                 </motion.div>
               ))}
             </nav>
+            <div className="mobile-menu__categories">
+              <span>Categories</span>
+              <div>
+                {categories.slice(0, 8).map((category) => (
+                  <Link key={category.id} to={`/catalogue?categorie=${encodeURIComponent(category.id)}`} onClick={() => setMenuOpen(false)}>
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
             <div className="mobile-menu__utilities">
               <Link to="/wishlist" onClick={() => setMenuOpen(false)}><Heart size={17} /> Liste des souhaits {wishlistCount > 0 && <span>{wishlistCount}</span>}</Link>
               <Link to="/admin" onClick={() => setMenuOpen(false)}><UserRound size={17} /> Mon compte</Link>
