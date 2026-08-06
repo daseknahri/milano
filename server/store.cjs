@@ -8,9 +8,19 @@ const DATA_FILE = path.join(STORAGE_DIR, 'content.json');
 const BACKUP_FILE = path.join(STORAGE_DIR, 'content.backup.json');
 const SEED_FILE = path.join(__dirname, 'data', 'content.seed.json');
 const LEGACY_CATEGORY_IDS = new Set(['ambient-led', 'transformation-kits', 'star-ceiling', 'interior-comfort', 'exterior-style']);
+const LEGACY_PRODUCT_IDS = new Set([
+  'led-ambient-64',
+  'led-footwell',
+  'bodykit-premium',
+  'sport-grille',
+  'star-headliner',
+  'wireless-carplay',
+  'steering-wheel-upgrade',
+  'adaptive-led-headlights',
+]);
 const CARL_CATEGORY_IDS = new Set(['volkswagen', 'bmw', 'mercedes', 'audi', 'range-rover', 'carplay', 'jantes', 'accessoires']);
-const CARL_REFERENCE_VERSION = 'carl-reference-v3';
-const PREVIOUS_CARL_PRODUCT_IDS = new Set([
+const CARL_REFERENCE_VERSION = 'carl-reference-v4';
+const CARL_REFERENCE_V2_PRODUCT_IDS = new Set([
   'mib2-fibre-volkswagen',
   'coffre-electrique-touareg-2019',
   'marchepied-electrique-touareg',
@@ -33,6 +43,13 @@ const PREVIOUS_CARL_PRODUCT_IDS = new Set([
   'bas-caisse-golf-7-gtd',
   'jante-audi-22',
 ]);
+const CARL_REFERENCE_V3_PRODUCT_IDS = new Set([
+  ...CARL_REFERENCE_V2_PRODUCT_IDS,
+  'coffre-electrique-touareg-2012',
+  'optiques-tiguan-led-2017',
+  'bas-caisse-golf-6-gti',
+]);
+const PREVIOUS_CARL_PRODUCT_ID_SETS = [CARL_REFERENCE_V2_PRODUCT_IDS, CARL_REFERENCE_V3_PRODUCT_IDS];
 
 let writeQueue = Promise.resolve();
 
@@ -219,11 +236,16 @@ async function migrateLegacyCatalogue() {
     && categoryIds.every((id) => LEGACY_CATEGORY_IDS.has(id))
     && !categoryIds.some((id) => CARL_CATEGORY_IDS.has(id));
   const currentProductIds = new Set(Array.isArray(current.products) ? current.products.map((product) => String(product?.id || '')) : []);
+  const isPristineLegacySeed = isLegacyOnly
+    && currentProductIds.size === LEGACY_PRODUCT_IDS.size
+    && [...currentProductIds].every((id) => LEGACY_PRODUCT_IDS.has(id));
   const isPreviousCarlReference = categoryIds.some((id) => CARL_CATEGORY_IDS.has(id))
     && current.catalogueVersion !== CARL_REFERENCE_VERSION
-    && currentProductIds.size === PREVIOUS_CARL_PRODUCT_IDS.size
-    && [...currentProductIds].every((id) => PREVIOUS_CARL_PRODUCT_IDS.has(id));
-  if (!isLegacyOnly && !isPreviousCarlReference) return;
+    && PREVIOUS_CARL_PRODUCT_ID_SETS.some((expectedIds) => (
+      currentProductIds.size === expectedIds.size
+      && [...currentProductIds].every((id) => expectedIds.has(id))
+    ));
+  if (!isPristineLegacySeed && !isPreviousCarlReference) return;
   try {
     const reference = await import(pathToFileURL(path.join(__dirname, '..', 'src', 'data', 'referenceShop.js')).href);
     const migrated = sanitizeContent({

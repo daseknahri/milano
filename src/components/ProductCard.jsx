@@ -10,6 +10,8 @@ export default function ProductCard({ product, priority = false }) {
     asList(product.vehicleModels).slice(0, 2).join(', '),
     asList(product.years).slice(0, 1).join(''),
   ].filter(Boolean).join(' · ')
+  const meta = [product.category, product.brand].filter(Boolean).join(' / ')
+
   return (
     <article className="product-card">
       <div className="product-card__media">
@@ -34,7 +36,7 @@ export default function ProductCard({ product, priority = false }) {
       </div>
       <div className="product-card__body">
         <div>
-          <p>{product.category} / {product.brand}</p>
+          {meta && <p>{meta}</p>}
           {fitment && <p className="product-card__fitment">Compatible : {fitment}</p>}
           <Link to={`/produit/${product.slug}`}><h3>{product.name}</h3></Link>
           <div className="product-price">
@@ -49,7 +51,8 @@ export default function ProductCard({ product, priority = false }) {
           aria-label={product.inStock === false ? `${product.name} est indisponible` : `Ajouter ${product.name} au panier`}
           disabled={product.inStock === false}
         >
-          <Plus size={20} />
+          <Plus size={17} aria-hidden="true" />
+          <span>Ajouter</span>
         </button>
       </div>
     </article>

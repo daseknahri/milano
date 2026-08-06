@@ -201,22 +201,22 @@ function ProductFinder({ finder, models, setFinder, target }) {
     <motion.form className="product-finder" variants={heroItem} onSubmit={submitFinder}>
       <div className="product-finder__head">
         <Search size={18} />
-        <span>Veuillez selectionner la marque et modele de votre voiture.</span>
+        <span>Sélectionnez votre voiture pour trouver les accessoires compatibles.</span>
       </div>
       <select value={finder.marque} onChange={(event) => update('marque', event.target.value)} aria-label="Marque">
         <option value="">Marque</option>
         {Object.keys(finderMakes).map((make) => <option key={make} value={make}>{make}</option>)}
       </select>
-      <select value={finder.modele} onChange={(event) => update('modele', event.target.value)} aria-label="Modele" disabled={!finder.marque}>
-        <option value="">Modele</option>
+      <select value={finder.modele} onChange={(event) => update('modele', event.target.value)} aria-label="Modèle" disabled={!finder.marque}>
+        <option value="">Modèle</option>
         {models.map((model) => <option key={model} value={model}>{model}</option>)}
       </select>
-      <input value={finder.q} onChange={(event) => update('q', event.target.value)} onKeyDown={submitOnEnter} placeholder="Nom du produit" aria-label="Nom du produit" />
-      <select value={finder.annee} onChange={(event) => update('annee', event.target.value)} aria-label="Annee">
-        <option value="">Annee</option>
+      <input value={finder.q} onChange={(event) => update('q', event.target.value)} onKeyDown={submitOnEnter} placeholder="Nom ou référence" aria-label="Nom du produit" />
+      <select value={finder.annee} onChange={(event) => update('annee', event.target.value)} aria-label="Année">
+        <option value="">Année</option>
         {years.map((year) => <option key={year} value={year}>{year}</option>)}
       </select>
-      <button type="submit" className="button button--accent">Chercher votre produit</button>
+      <button type="submit" className="button button--accent">Voir les accessoires</button>
     </motion.form>
   )
 }

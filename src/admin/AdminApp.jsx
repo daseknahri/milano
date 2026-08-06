@@ -1060,11 +1060,21 @@ function Toggle({ checked, onChange, label, description }) {
 
 function EditorDrawer({ title, children, onClose, wide = false, busy = false }) {
   const dialogRef = useRef(null)
+  const onCloseRef = useRef(onClose)
+  const busyRef = useRef(busy)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
+
+  useEffect(() => {
+    busyRef.current = busy
+  }, [busy])
 
   useEffect(() => {
     const previouslyFocused = document.activeElement
     const handleDialogKeys = (event) => {
-      if (event.key === 'Escape' && !busy) onClose()
+      if (event.key === 'Escape' && !busyRef.current) onCloseRef.current()
       if (event.key !== 'Tab') return
       const focusable = [...(dialogRef.current?.querySelectorAll(
         'button:not([disabled]):not(.dialog-scrim), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
@@ -1087,7 +1097,7 @@ function EditorDrawer({ title, children, onClose, wide = false, busy = false }) 
       document.body.classList.remove('drawer-open')
       previouslyFocused?.focus?.()
     }
-  }, [onClose, busy])
+  }, [])
 
   return createPortal(
     <div ref={dialogRef} className="dialog-layer" role="dialog" aria-modal="true" aria-label={title}>

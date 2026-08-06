@@ -43,10 +43,14 @@ test('health and seeded public content are available', async () => {
   const content = await response.json();
   assert.equal(response.status, 200);
   assert.equal(content.settings.city, 'Tanger');
-  assert.equal(content.catalogueVersion, 'carl-reference-v3');
+  assert.equal(content.catalogueVersion, 'carl-reference-v4');
   assert.ok(content.categories.some((category) => category.id === 'volkswagen'));
   assert.ok(content.products.some((product) => product.slug === 'poste-mib2-2-carte-fibre'));
   assert.ok(content.products.some((product) => product.slug === 'optiques-led-volkswagen-tiguan-2017-2021'));
+  assert.ok(content.products.some((product) => product.slug === 'calandre-rs4-audi-a4-2021-2025'));
+  assert.equal(content.products.length, 57);
+  assert.ok(content.products.some((product) => product.categoryId === 'range-rover'));
+  assert.ok(content.products.some((product) => product.categoryId === 'carplay'));
   assert.equal(content.settings.shortName, 'Milan Auto');
   assert.match(content.settings.mapUrl, /^https:\/\/www\.google\.com\/maps/);
   assert.ok(content.categories.length >= 5);
