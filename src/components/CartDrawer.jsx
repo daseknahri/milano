@@ -74,7 +74,13 @@ export default function CartDrawer() {
                   <div><span>{hasQuoteItems ? 'Devis personnalisé' : 'Total indicatif'}</span><strong>{hasQuoteItems ? 'À confirmer' : formatPrice(total)}</strong></div>
                   <p>Disponibilité et compatibilité confirmées par notre équipe avant paiement.</p>
                   {hasUnavailableItems ? (
-                    <button className="button button--accent" type="button" disabled>Retirez les articles indisponibles</button>
+                    <button
+                      className="button button--accent"
+                      type="button"
+                      onClick={() => cart.filter((item) => item.inStock === false).forEach((item) => updateQuantity(item.id, 0))}
+                    >
+                      Retirer les articles indisponibles
+                    </button>
                   ) : whatsappHref ? <a className="button button--accent" href={whatsappHref} target="_blank" rel="noreferrer">Commander sur WhatsApp <ArrowUpRight size={18} /></a> : <Link className="button button--accent" to="/contact" onClick={() => setCartOpen(false)}>Nous contacter pour commander <ArrowUpRight size={18} /></Link>}
                 </div>
               </>
