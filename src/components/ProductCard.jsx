@@ -10,7 +10,10 @@ export default function ProductCard({ product, priority = false }) {
     asList(product.vehicleModels).slice(0, 2).join(', '),
     asList(product.years).slice(0, 1).join(''),
   ].filter(Boolean).join(' · ')
-  const meta = [product.category, product.brand].filter(Boolean).join(' / ')
+  const meta = [product.category, product.brand]
+    .filter(Boolean)
+    .filter((value, index, values) => values.findIndex((item) => String(item).toLowerCase() === String(value).toLowerCase()) === index)
+    .join(' / ')
 
   return (
     <article className="product-card">
