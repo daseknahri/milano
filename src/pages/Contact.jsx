@@ -8,8 +8,9 @@ export default function Contact() {
   const { settings } = useStore()
   const phoneHref = settings.phone ? `tel:${String(settings.phone).replace(/\s/g, '')}` : ''
   const locationLabel = [settings.address, settings.city]
+    .map((value) => String(value || '').trim())
     .filter(Boolean)
-    .filter((value, index, values) => values.indexOf(value) === index)
+    .filter((value, index, values) => !values.some((other, otherIndex) => otherIndex < index && other.toLowerCase().includes(value.toLowerCase())))
     .join(', ') || 'Tanger, Maroc'
   const mapQuery = locationLabel || 'Tanger, Maroc'
   const whatsappHref = whatsappLink(settings.whatsapp, 'Bonjour Milan, je souhaite un conseil pour mon véhicule.')
